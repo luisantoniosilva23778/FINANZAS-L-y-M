@@ -1,1 +1,0 @@
-# FINANZAS-L-y-M
