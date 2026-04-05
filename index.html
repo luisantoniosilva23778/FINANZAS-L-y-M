@@ -84,14 +84,14 @@ const db = getDatabase(app);
 
 // ================= LOGIN =================
 window.login = function () {
-    const user = document.getElementById("user").value;
-    const pass = document.getElementById("pass").value;
+    const user = document.getElementById("user").value.trim();
+    const pass = document.getElementById("pass").value.trim();
 
     if (user === "admin" && pass === "1234") {
         document.getElementById("login").style.display = "none";
         document.getElementById("app").style.display = "block";
     } else {
-        document.getElementById("error").innerText = "Datos incorrectos";
+        document.getElementById("error").innerText = "Usuario o contraseña incorrectos";
     }
 };
 
