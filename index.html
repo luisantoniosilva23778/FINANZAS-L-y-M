@@ -1,172 +1,89 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Finanzas Hogar</title>
-
-<style>
-body { font-family: Arial; padding:20px; }
-section { display:none; }
-.active { display:block; }
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas M y L</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="active">
-    <h2>Login</h2>
-    <input id="user" placeholder="Usuario">
-    <input id="pass" type="password" placeholder="Contraseña">
-    <button onclick="login()">Entrar</button>
-    <p id="error" style="color:red;"></p>
-</div>
+    <div id="login-screen" class="screen">
+        <div class="login-box">
+            <h2>Acceso a Finanzas</h2>
+            <input type="text" id="username" placeholder="Usuario">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="login()">Ingresar</button>
+            <p id="login-error" style="color: red; display: none;">Credenciales incorrectas.</p>
+        </div>
+    </div>
 
-<!-- APP -->
-<div id="app" style="display:none;">
+    <div id="app-screen" class="screen" style="display: none;">
+        <header>
+            <h1>Control Financiero 2026</h1>
+            <button onclick="logout()" class="btn-logout">Salir</button>
+        </header>
 
-<h1>Control Financiero</h1>
+        <nav>
+            <button class="tab-btn active" onclick="showTab('tenemos')">Tenemos 2026</button>
+            <button class="tab-btn" onclick="showTab('casta')">Casta (Gastos)</button>
+            <button class="tab-btn" onclick="showTab('metas')">Metas 2026</button>
+            <button class="tab-btn" onclick="showTab('vacaciones')">Vacaciones VZLA</button>
+        </nav>
 
-<button onclick="mostrar('cuentas')">Cuentas</button>
-<button onclick="mostrar('movimientos')">Movimientos</button>
-<button onclick="mostrar('resumen')">Resumen</button>
+        <main>
+            <section id="tenemos" class="tab-content active">
+                <h2>Cuentas y Sueldos</h2>
+                <div class="card">
+                    <h3>Tasas de Cambio</h3>
+                    <label>Tasa USD a EURO: <input type="number" step="0.01" id="tasa-usd" value="0.85"></label>
+                </div>
+                <div class="card">
+                    <h3>Sueldos</h3>
+                    <label>Base Danye: <input type="number" id="base-danye" value="820"></label>
+                    <label>Base Luis: <input type="number" id="base-luis" value="1100"></label>
+                    <button onclick="guardarTenemos()">Guardar y Calcular</button>
+                    <p>Total Ingresos Danye + Luis (con alimentación): <strong id="total-sueldos">0</strong>€</p>
+                </div>
+            </section>
 
-<section id="cuentas" class="active">
-    <h2>Cuentas</h2>
-    <input id="nombreCuenta">
-    <input id="saldoCuenta" type="number">
-    <button onclick="agregarCuenta()">Agregar</button>
-    <ul id="listaCuentas"></ul>
-</section>
+            <section id="casta" class="tab-content" style="display: none;">
+                <h2>Control Casta (Gastos Médicos e Ingresos)</h2>
+                <div class="card">
+                    <h3>Añadir Nuevo Gasto Médico</h3>
+                    <input type="text" id="gasto-desc" placeholder="Ej: Examen de sangre">
+                    <input type="number" id="gasto-monto" placeholder="Monto en Bolívares">
+                    <button onclick="agregarGasto()">Añadir Gasto</button>
+                </div>
+                <ul id="lista-gastos"></ul>
+                <h3>Total Gastos: <strong id="total-gastos">0</strong> Bs</h3>
+            </section>
 
-<section id="movimientos">
-    <h2>Movimientos</h2>
+            <section id="metas" class="tab-content" style="display: none;">
+                <h2>Metas de Ahorro Mensual</h2>
+                <div class="card">
+                    <p>Meta mensual ahorros: <strong>645€</strong></p>
+                    <p>Meta mensual vacaciones: <strong>183€</strong></p>
+                    <button onclick="registrarMes()">Registrar Mes Cumplido</button>
+                    <p>Meses cumplidos: <strong id="meses-cumplidos">0</strong></p>
+                    <p>Total Ahorrado: <strong id="total-ahorrado">0</strong>€</p>
+                </div>
+            </section>
 
-    <select id="tipo">
-        <option value="ingreso">Ingreso</option>
-        <option value="gasto">Gasto</option>
-    </select>
+            <section id="vacaciones" class="tab-content" style="display: none;">
+                <h2>Vacaciones Venezuela</h2>
+                <div class="card">
+                    <label>Fondos 2026: <input type="number" id="fondos-vacaciones" value="2196"></label>
+                    <label>Pasajes LIS-CAR: <input type="number" id="pasaje-lis-car" value="1296"></label>
+                    <label>Pasajes CAR-VAL: <input type="number" id="pasaje-car-val" value="240"></label>
+                    <button onclick="calcularVacaciones()">Calcular Restante</button>
+                    <p>Total Gastado: <strong id="total-vacaciones">1536</strong>€</p>
+                    <p>Quedan: <strong id="quedan-vacaciones" style="color: green;">660</strong>€</p>
+                </div>
+            </section>
+        </main>
+    </div>
 
-    <input id="descripcion">
-    <input id="monto" type="number">
-    <input id="fecha" type="date">
-
-    <button onclick="agregarMovimiento()">Guardar</button>
-
-    <ul id="listaMovimientos"></ul>
-</section>
-
-<section id="resumen">
-    <h2>Resumen</h2>
-    <p>Ingresos: <span id="totalIngresos">0</span></p>
-    <p>Gastos: <span id="totalGastos">0</span></p>
-    <p>Ahorro: <span id="ahorro">0</span></p>
-</section>
-
-</div>
-
-<script type="module">
-
-// 🔥 FIREBASE
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
-  authDomain: "finanzas-m-y-l.firebaseapp.com",
-  databaseURL: "https://finanzas-m-y-l-default-rtdb.firebaseio.com",
-  projectId: "finanzas-m-y-l"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// ================= LOGIN =================
-window.login = function () {
-    const user = document.getElementById("user").value.trim();
-    const pass = document.getElementById("pass").value.trim();
-
-    if (user === "admin" && pass === "1234") {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("app").style.display = "block";
-    } else {
-        document.getElementById("error").innerText = "Usuario o contraseña incorrectos";
-    }
-};
-
-// ================= ESTADO =================
-let estado = { cuentas: [], movimientos: [] };
-
-const cuentasRef = ref(db, "cuentas");
-const movimientosRef = ref(db, "movimientos");
-
-onValue(cuentasRef, (snap) => {
-    estado.cuentas = [];
-    snap.forEach(c => estado.cuentas.push(c.val()));
-    render();
-});
-
-onValue(movimientosRef, (snap) => {
-    estado.movimientos = [];
-    snap.forEach(m => estado.movimientos.push(m.val()));
-    render();
-});
-
-// ================= FUNCIONES =================
-window.mostrar = function(id){
-    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-};
-
-window.agregarCuenta = function(){
-    push(cuentasRef, {
-        nombre: nombreCuenta.value,
-        saldo: Number(saldoCuenta.value)
-    });
-};
-
-window.agregarMovimiento = function(){
-    push(movimientosRef, {
-        tipo: tipo.value,
-        descripcion: descripcion.value,
-        monto: Number(monto.value),
-        fecha: fecha.value
-    });
-};
-
-// ================= LOGICA =================
-function calcularResumen(){
-    let ingresos = 0, gastos = 0;
-
-    estado.movimientos.forEach(m=>{
-        if(m.tipo==="ingreso") ingresos+=m.monto;
-        else gastos+=m.monto;
-    });
-
-    return { ingresos, gastos, ahorro: ingresos-gastos };
-}
-
-// ================= RENDER =================
-function render(){
-
-    listaCuentas.innerHTML="";
-    estado.cuentas.forEach(c=>{
-        listaCuentas.innerHTML += `<li>${c.nombre} - ${c.saldo}</li>`;
-    });
-
-    listaMovimientos.innerHTML="";
-    estado.movimientos.forEach(m=>{
-        listaMovimientos.innerHTML += `<li>${m.tipo} - ${m.descripcion} - ${m.monto}</li>`;
-    });
-
-    const r = calcularResumen();
-    totalIngresos.innerText = r.ingresos;
-    totalGastos.innerText = r.gastos;
-    ahorro.innerText = r.ahorro;
-}
-
-</script>
-
+    <script type="module" src="app.js"></script>
 </body>
 </html>
