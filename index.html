@@ -324,4 +324,146 @@
             const data = {
                 ingDanye: getVal('ing-danye'), ingLuis: getVal('ing-luis'),
                 ahorro: getVal('gasto-ahorro'), vac: getVal('gasto-vac'),
-                arriendo: getVal('g-arriendo'), mercado
+                arriendo: getVal('g-arriendo'), mercado: getVal('g-mercado'), trans: getVal('g-transporte'),
+                serv: getVal('g-servicios'), tel: getVal('g-telefono'), otros: getVal('g-otros'),
+                antojos: getVal('g-antojos'), donaciones: getVal('g-donaciones'), formacion: getVal('g-formacion')
+            };
+            set(ref(db, 'finanzas_excel/presupuesto'), data);
+            calcularLibro(data);
+            alert("Presupuesto Guardado.");
+        };
+
+        function calcularLibro(d) {
+            const totalIngresos = d.ingDanye + d.ingLuis;
+            document.getElementById('lbl-subtotal-ing').innerText = formatCur(totalIngresos) + ' €';
+
+            const necBasicas = d.arriendo + d.mercado + d.trans + d.serv + d.tel + d.otros;
+            
+            const renderRow = (nombre, monto, ideal) => {
+                const pct = totalIngresos > 0 ? (monto / totalIngresos) * 100 : 0;
+                let colorClass = "";
+                if(nombre.includes("Inversión") || nombre.includes("Largo Plazo")) {
+                    colorClass = pct >= ideal ? "text-green" : "text-red";
+                } else {
+                    colorClass = pct <= ideal ? "text-green" : "text-red";
+                }
+                return `<tr>
+                    <td>${nombre}</td>
+                    <td class="text-right ${colorClass}">${pct.toFixed(2)}%</td>
+                    <td class="text-right">${ideal}%</td>
+                </tr>`;
+            };
+
+            document.getElementById('tabla-libro').innerHTML = 
+                renderRow('Necesidades Básicas (50%)', necBasicas, 50) +
+                renderRow('Inversiones / Ahorro Fijo (10%)', d.ahorro, 10) +
+                renderRow('Ahorro Largo Plazo / Vacaciones (10%)', d.vac, 10) +
+                renderRow('Ocio / Antojos (10%)', d.antojos, 10) +
+                renderRow('Donaciones (10%)', d.donaciones, 10) +
+                renderRow('Formación (10%)', d.formacion, 10);
+        }
+
+        // --- 3. LÓGICA PROMESAS VS REAL ---
+        const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const promesaBase = 22991.33; // Inicio Enero
+        const incrementoMensual = 645;
+
+        function generarTablaPromesas() {
+            let html = "";
+            for(let i=0; i<12; i++) {
+                const promesaMes = promesaBase + (i * incrementoMensual);
+                html += `
+                    <tr>
+                        <td><strong>${mesesNombres[i]}</strong></td>
+                        <td class="text-right">${formatCur(promesaMes)} €</td>
+                        <td class="text-right"><input type="number" class="month-input" id="alcanzado-${i}" placeholder="Real"></td>
+                        <td class="text-right" id="dif-${i}">--</td>
+                        <td class="text-center" id="estado-${i}">--</td>
+                    </tr>
+                `;
+            }
+            document.getElementById('tabla-promesas').innerHTML = html;
+        }
+
+        window.guardarPromesas = function() {
+            let datosMeses = {};
+            for(let i=0; i<12; i++) {
+                let val = document.getElementById(`alcanzado-${i}`).value;
+                if(val !== "") datosMeses[i] = parseFloat(val);
+            }
+            set(ref(db, 'finanzas_excel/promesas'), datosMeses);
+            calcularPromesas(datosMeses);
+            alert("Progreso Mensual Guardado.");
+        };
+
+        function calcularPromesas(datosMeses) {
+            for(let i=0; i<12; i++) {
+                if(datosMeses[i] !== undefined) {
+                    document.getElementById(`alcanzado-${i}`).value = datosMeses[i];
+                    const promesaMes = promesaBase + (i * incrementoMensual);
+                    const dif = datosMeses[i] - promesaMes;
+                    document.getElementById(`dif-${i}`).innerText = formatCur(dif) + ' €';
+                    
+                    let estado = dif >= 0 ? '<span style="color:green;font-weight:bold">SUPERÁVIT</span>' : '<span style="color:red;font-weight:bold">DÉFICIT</span>';
+                    if (dif === 0) estado = '<span style="color:gray;font-weight:bold">NEUTRO</span>';
+                    document.getElementById(`estado-${i}`).innerHTML = estado;
+                }
+            }
+        }
+
+        // --- 4. LÓGICA ANÁLISIS HISTÓRICO ---
+        function calcularHistorico() {
+            // Meses totales estimados desde el Excel (97.6)
+            const mesesTotales = 97.66; 
+            const promCaso1 = 474.70; // Hardcoded from your historical math
+            const promCaso2 = 151.68; // Hardcoded minimum 10%
+            
+            // Caso 3 se alimenta del "Contamos Realmente" actual
+            const promCaso3 = globalRealmente > 0 ? (globalRealmente / mesesTotales) : 0;
+            document.getElementById('lbl-caso3').innerText = formatCur(promCaso3) + ' € / mes';
+
+            // Porcentajes de diferencia
+            if(promCaso3 > 0) {
+                const vsCaso1 = ((promCaso3 - promCaso1) / promCaso1) * 100;
+                const vsCaso2 = ((promCaso3 - promCaso2) / promCaso2) * 100;
+                
+                document.getElementById('lbl-vs-caso1').innerHTML = vsCaso1 >= 0 ? `<span class="text-green">+${vsCaso1.toFixed(2)}%</span>` : `<span class="text-red">${vsCaso1.toFixed(2)}%</span>`;
+                document.getElementById('lbl-vs-caso2').innerHTML = vsCaso2 >= 0 ? `<span class="text-green">+${vsCaso2.toFixed(2)}%</span>` : `<span class="text-red">${vsCaso2.toFixed(2)}%</span>`;
+            }
+        }
+
+        // --- CARGA INICIAL DE DATOS FIREBASE ---
+        function cargarDatos() {
+            onValue(ref(db, 'finanzas_excel/balance'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    setVal('acc-mill', data.accMill); setVal('acc-wise', data.accWise); setVal('acc-alim', data.accAlim);
+                    setVal('acc-efec-dia', data.accEfecDia); setVal('acc-efec-gua', data.accEfecGua); setVal('acc-vzla', data.accVzla);
+                    setVal('acc-binance', data.accBinance); setVal('tasa-usdt', data.tasaUsdt);
+                    setVal('res-vac26', data.resVac26); setVal('res-vac27', data.resVac27); setVal('res-superavit', data.resSuperavit);
+                    setVal('res-loc-d', data.resLocD); setVal('res-loc-l', data.resLocL); setVal('res-prestamos', data.resPrestamos);
+                    setVal('res-pendientes', data.resPendientes);
+                    calcularBalance(data);
+                }
+            });
+
+            onValue(ref(db, 'finanzas_excel/presupuesto'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    setVal('ing-danye', data.ingDanye); setVal('ing-luis', data.ingLuis);
+                    setVal('gasto-ahorro', data.ahorro); setVal('gasto-vac', data.vac);
+                    setVal('g-arriendo', data.arriendo); setVal('g-mercado', data.mercado); setVal('g-transporte', data.trans);
+                    setVal('g-servicios', data.serv); setVal('g-telefono', data.tel); setVal('g-otros', data.otros);
+                    setVal('g-antojos', data.antojos); setVal('g-donaciones', data.donaciones); setVal('g-formacion', data.formacion);
+                    calcularLibro(data);
+                }
+            });
+
+            onValue(ref(db, 'finanzas_excel/promesas'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) calcularPromesas(data);
+            });
+        }
+    </script>
+</body>
+</html>
