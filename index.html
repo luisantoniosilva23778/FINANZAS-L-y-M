@@ -338,4 +338,41 @@
 
         // --- CARGAR DATOS DE FIREBASE EN TIEMPO REAL ---
         function cargarDatos() {
+            onValue(ref(db, 'finanzas_2026/capital'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    setVal('acc-millennium', data.millennium); setVal('acc-wise', data.wise);
+                    setVal('acc-efectivo', data.efectivo); setVal('acc-diario', data.diario);
+                    setVal('acc-binance', data.binance); setVal('tasa-usdt', data.tasaUsdt);
+                    setVal('res-vac-26', data.resVac26); setVal('res-vac-27', data.resVac27);
+                    setVal('res-emergencia', data.resEmergencia);
+                    setVal('res-locura-d', data.locuraD); setVal('res-locura-l', data.locuraL);
+                    calcularPatrimonio(data);
+                }
+            });
+
+            onValue(ref(db, 'finanzas_2026/presupuesto'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    setVal('ing-danye', data.ingDanye); setVal('ing-luis', data.ingLuis);
+                    setVal('gasto-ahorro', data.ahorro); setVal('gasto-vac', data.vac);
+                    setVal('gasto-arriendo', data.arriendo); setVal('gasto-mercado', data.mercado);
+                    setVal('gasto-transporte', data.transporte); setVal('gasto-servicios', data.servicios);
+                    setVal('gasto-telefono', data.telefono); setVal('gasto-tarjeta', data.tarjeta);
+                    setVal('gasto-pastillas', data.pastillas); setVal('gasto-antojos', data.antojos);
+                    ejecutarAnalisis(data);
+                }
+            });
+
+            onValue(ref(db, 'finanzas_2026/metas'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    setVal('meta-meses-ahorro', data.mesesAhorro);
+                    document.getElementById('lbl-proyeccion-ahorro').innerText = (22991.33 + (data.mesesAhorro * 645)).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' €';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
             
