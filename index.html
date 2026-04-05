@@ -3,87 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas M y L</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Finanzas M y L 2026</title>
+    <style>
+        /* ================= CSS INTEGRADO ================= */
+        :root { --bg: #f0f2f5; --primary: #1e3a8a; --secondary: #3b82f6; --text: #333; --card: #ffffff; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text); }
+        
+        /* Login */
+        #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--primary); }
+        .login-box { background: var(--card); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; max-width: 350px; text-align: center; }
+        .login-box h2 { margin-bottom: 20px; color: var(--primary); }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        .login-box button { width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        
+        /* App Layout */
+        header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        header h1 { font-size: 1.2rem; }
+        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+        
+        nav { display: flex; background: #fff; border-bottom: 2px solid #ddd; overflow-x: auto; white-space: nowrap; }
+        .tab-btn { flex: 1; padding: 15px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: bold; color: #666; }
+        .tab-btn.active { border-bottom-color: var(--secondary); color: var(--secondary); }
+        
+        main { padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Cards & Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        .card { background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; }
+        
+        /* Form Elements */
+        .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
+        .form-group label { font-size: 0.9rem; font-weight: 500; }
+        .form-group input { width: 100px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+        .btn-save { display: block; width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        
+        /* Totals & Analysis */
+        .total-box { background: var(--primary); color: white; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .total-box h2 { font-size: 2rem; margin: 10px 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        table th { background: #f8fafc; }
+        .text-right { text-align: right; }
+        
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .bg-green { background: #d1fae5; color: #065f46; }
+        .bg-red { background: #fee2e2; color: #991b1b; }
+    </style>
 </head>
 <body>
 
-    <div id="login-screen" class="screen">
+    <div id="login-screen">
         <div class="login-box">
-            <h2>Acceso a Finanzas</h2>
+            <h2>Sistema Financiero</h2>
             <input type="text" id="username" placeholder="Usuario">
             <input type="password" id="password" placeholder="Contraseña">
-            <button onclick="login()">Ingresar</button>
-            <p id="login-error" style="color: red; display: none;">Credenciales incorrectas.</p>
+            <button onclick="window.login()">Ingresar</button>
+            <p id="login-error" style="color: var(--danger); display: none; margin-top: 10px;">Acceso denegado.</p>
         </div>
     </div>
 
-    <div id="app-screen" class="screen" style="display: none;">
+    <div id="app-screen" style="display: none;">
         <header>
-            <h1>Control Financiero 2026</h1>
-            <button onclick="logout()" class="btn-logout">Salir</button>
+            <h1>Finanzas M & L</h1>
+            <button onclick="window.logout()" class="btn-logout">Cerrar Sesión</button>
         </header>
 
         <nav>
-            <button class="tab-btn active" onclick="showTab('tenemos')">Tenemos 2026</button>
-            <button class="tab-btn" onclick="showTab('casta')">Casta (Gastos)</button>
-            <button class="tab-btn" onclick="showTab('metas')">Metas 2026</button>
-            <button class="tab-btn" onclick="showTab('vacaciones')">Vacaciones VZLA</button>
+            <button class="tab-btn active" onclick="window.showTab('dashboard')">Capital Total</button>
+            <button class="tab-btn" onclick="window.showTab('presupuesto')">Presupuesto</button>
+            <button class="tab-btn" onclick="window.showTab('analisis')">Análisis</button>
+            <button class="tab-btn" onclick="window.showTab('metas')">Metas 2026</button>
         </nav>
 
         <main>
-            <section id="tenemos" class="tab-content active">
-                <h2>Cuentas y Sueldos</h2>
-                <div class="card">
-                    <h3>Tasas de Cambio</h3>
-                    <label>Tasa USD a EURO: <input type="number" step="0.01" id="tasa-usd" value="0.85"></label>
+            <section id="dashboard" class="tab-content active">
+                <div class="total-box">
+                    <p>TOTAL PATRIMONIO (EUROS)</p>
+                    <h2 id="lbl-total-patrimonio">0.00 €</h2>
+                    <p>Reservas de Emergencia + Ahorros + Liquidez</p>
                 </div>
-                <div class="card">
-                    <h3>Sueldos</h3>
-                    <label>Base Danye: <input type="number" id="base-danye" value="820"></label>
-                    <label>Base Luis: <input type="number" id="base-luis" value="1100"></label>
-                    <button onclick="guardarTenemos()">Guardar y Calcular</button>
-                    <p>Total Ingresos Danye + Luis (con alimentación): <strong id="total-sueldos">0</strong>€</p>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Cuentas y Activos</h3>
+                        <div class="form-group"><label>Millennium (€)</label><input type="number" id="acc-millennium" step="0.01"></div>
+                        <div class="form-group"><label>Wise (€)</label><input type="number" id="acc-wise" step="0.01"></div>
+                        <div class="form-group"><label>Efectivo Guardado (€)</label><input type="number" id="acc-efectivo" step="0.01"></div>
+                        <div class="form-group"><label>Efectivo Diario (€)</label><input type="number" id="acc-diario" step="0.01"></div>
+                        <div class="form-group"><label>Binance (USDT)</label><input type="number" id="acc-binance" step="0.01"></div>
+                        <div class="form-group"><label>Tasa USDT a EUR</label><input type="number" id="tasa-usdt" step="0.01" value="0.85"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Reservas y Potes (Comprometido)</h3>
+                        <div class="form-group"><label>Reserva Vacaciones 2026</label><input type="number" id="res-vac-26" step="0.01" value="2196"></div>
+                        <div class="form-group"><label>Reserva Vacaciones 2027</label><input type="number" id="res-vac-27" step="0.01"></div>
+                        <div class="form-group"><label>Superávit / Emergencia</label><input type="number" id="res-emergencia" step="0.01"></div>
+                        <div class="form-group"><label>Locura Danye</label><input type="number" id="res-locura-d" step="0.01"></div>
+                        <div class="form-group"><label>Locura Luis</label><input type="number" id="res-locura-l" step="0.01"></div>
+                        <button class="btn-save" onclick="window.guardarCapital()">Guardar Capital</button>
+                    </div>
                 </div>
             </section>
 
-            <section id="casta" class="tab-content" style="display: none;">
-                <h2>Control Casta (Gastos Médicos e Ingresos)</h2>
-                <div class="card">
-                    <h3>Añadir Nuevo Gasto Médico</h3>
-                    <input type="text" id="gasto-desc" placeholder="Ej: Examen de sangre">
-                    <input type="number" id="gasto-monto" placeholder="Monto en Bolívares">
-                    <button onclick="agregarGasto()">Añadir Gasto</button>
+            <section id="presupuesto" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Ingresos Reales</h3>
+                        <div class="form-group"><label>Sueldo Danye Líquido</label><input type="number" id="ing-danye" step="0.01" value="879"></div>
+                        <div class="form-group"><label>Sueldo Luis Líquido</label><input type="number" id="ing-luis" step="0.01" value="1265"></div>
+                        <div style="text-align: right; margin-top: 10px;"><strong>Total Ingresos: <span id="lbl-total-ingresos">2144</span> €</strong></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Ahorro e Inversión Fija</h3>
+                        <div class="form-group"><label>Ahorro Fijo (Capital)</label><input type="number" id="gasto-ahorro" step="0.01" value="645"></div>
+                        <div class="form-group"><label>Fondo Vacaciones (D+L)</label><input type="number" id="gasto-vac" step="0.01" value="183"></div>
+                    </div>
                 </div>
-                <ul id="lista-gastos"></ul>
-                <h3>Total Gastos: <strong id="total-gastos">0</strong> Bs</h3>
+
+                <div class="card">
+                    <h3>Gastos Básicos y Operativos</h3>
+                    <div class="grid-2">
+                        <div>
+                            <div class="form-group"><label>Arriendo</label><input type="number" id="gasto-arriendo" step="0.01" value="500"></div>
+                            <div class="form-group"><label>Mercado</label><input type="number" id="gasto-mercado" step="0.01" value="230"></div>
+                            <div class="form-group"><label>Transporte</label><input type="number" id="gasto-transporte" step="0.01" value="80"></div>
+                            <div class="form-group"><label>Servicios (Gas, Int, Nflx)</label><input type="number" id="gasto-servicios" step="0.01" value="100"></div>
+                        </div>
+                        <div>
+                            <div class="form-group"><label>Teléfono</label><input type="number" id="gasto-telefono" step="0.01" value="52"></div>
+                            <div class="form-group"><label>Comisión Tarjeta</label><input type="number" id="gasto-tarjeta" step="0.01" value="12"></div>
+                            <div class="form-group"><label>Pastillas</label><input type="number" id="gasto-pastillas" step="0.01" value="7"></div>
+                            <div class="form-group"><label>Antojos / Otros</label><input type="number" id="gasto-antojos" step="0.01" value="135"></div>
+                        </div>
+                    </div>
+                    <button class="btn-save" onclick="window.guardarPresupuesto()">Calcular y Guardar Presupuesto</button>
+                </div>
             </section>
 
-            <section id="metas" class="tab-content" style="display: none;">
-                <h2>Metas de Ahorro Mensual</h2>
+            <section id="analisis" class="tab-content">
                 <div class="card">
-                    <p>Meta mensual ahorros: <strong>645€</strong></p>
-                    <p>Meta mensual vacaciones: <strong>183€</strong></p>
-                    <button onclick="registrarMes()">Registrar Mes Cumplido</button>
-                    <p>Meses cumplidos: <strong id="meses-cumplidos">0</strong></p>
-                    <p>Total Ahorrado: <strong id="total-ahorrado">0</strong>€</p>
+                    <h3>Distribución Real vs Libro (Basado en Ingresos Totales)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th class="text-right">Gasto Real (€)</th>
+                                <th class="text-right">% Real</th>
+                                <th class="text-right">% Ideal (Libro)</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-analisis">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>Histórico Migratorio (Ritmo de Ahorro)</h3>
+                    <table>
+                        <thead><tr><th>País</th><th>Meses</th><th>Promedio/Mes</th><th>Total</th></tr></thead>
+                        <tbody>
+                            <tr><td>Colombia</td><td>18.9</td><td>200 €</td><td>3,780 €</td></tr>
+                            <tr><td>Chile</td><td>56.7</td><td>500 €</td><td>28,350 €</td></tr>
+                            <tr><td>Portugal</td><td>22.0</td><td>645 €</td><td>14,233 €</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
-            <section id="vacaciones" class="tab-content" style="display: none;">
-                <h2>Vacaciones Venezuela</h2>
-                <div class="card">
-                    <label>Fondos 2026: <input type="number" id="fondos-vacaciones" value="2196"></label>
-                    <label>Pasajes LIS-CAR: <input type="number" id="pasaje-lis-car" value="1296"></label>
-                    <label>Pasajes CAR-VAL: <input type="number" id="pasaje-car-val" value="240"></label>
-                    <button onclick="calcularVacaciones()">Calcular Restante</button>
-                    <p>Total Gastado: <strong id="total-vacaciones">1536</strong>€</p>
-                    <p>Quedan: <strong id="quedan-vacaciones" style="color: green;">660</strong>€</p>
+            <section id="metas" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Evolución Ahorro Base (Meta: +645/mes)</h3>
+                        <p>Capital Inicial Enero: <strong>22,991.33 €</strong></p>
+                        <p>Meta Diciembre 2026: <strong>30,086.33 €</strong></p>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Meses Cumplidos (1-12)</label>
+                            <input type="number" id="meta-meses-ahorro" min="0" max="12" value="2">
+                        </div>
+                        <p>Ahorro Proyectado Actual: <strong id="lbl-proyeccion-ahorro" style="color: var(--secondary)">24,281.33 €</strong></p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Hábitos y Crecimiento</h3>
+                        <ul>
+                            <li style="margin-bottom:10px;">✅ <strong>Portugués:</strong> 5 Días x Semana</li>
+                            <li style="margin-bottom:10px;">✅ <strong>Ejercicio:</strong> 3 Días x Semana</li>
+                            <li style="margin-bottom:10px;">✅ <strong>Paseos:</strong> 1 cada 2 meses</li>
+                            <li style="margin-bottom:10px;">✅ <strong>Reunión Finanzas:</strong> Penúltima semana de cada mes</li>
+                        </ul>
+                        <button class="btn-save" onclick="window.guardarMetas()">Actualizar Progreso</button>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script type="module" src="app.js"></script>
-</body>
-</html>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        // CONFIGURACIÓN FIREBASE PROPORCIONADA
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
+            authDomain: "finanzas-m-y-l.firebaseapp.com",
+            databaseURL: "https://finanzas-m-y-l-default-rtdb.firebaseio.com",
+            projectId: "finanzas-m-y-l",
+            storageBucket: "finanzas-m-y-l.firebasestorage.app",
+            messagingSenderId: "590213560036",
+            appId: "1:590213560036:web:c03a20e0e207b3f60fdef1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // --- SISTEMA DE LOGIN Y TABS ---
+        window.login = function() {
+            if(document.getElementById("username").value === "admin" && document.getElementById("password").value === "1234") {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("app-screen").style.display = "block";
+                cargarDatos();
+            } else {
+                document.getElementById("login-error").style.display = "block";
+            }
+        };
+
+        window.logout = function() {
+            document.getElementById("app-screen").style.display = "none";
+            document.getElementById("login-screen").style.display = "flex";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        };
+
+        window.showTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        };
+
+        // --- LÓGICA DE NEGOCIO ---
+
+        function obtenerVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+        function setVal(id, val) { document.getElementById(id).value = val; }
+
+        window.guardarCapital = function() {
+            const data = {
+                millennium: obtenerVal('acc-millennium'), wise: obtenerVal('acc-wise'),
+                efectivo: obtenerVal('acc-efectivo'), diario: obtenerVal('acc-diario'),
+                binance: obtenerVal('acc-binance'), tasaUsdt: obtenerVal('tasa-usdt'),
+                resVac26: obtenerVal('res-vac-26'), resVac27: obtenerVal('res-vac-27'),
+                resEmergencia: obtenerVal('res-emergencia'), locuraD: obtenerVal('res-locura-d'),
+                locuraL: obtenerVal('res-locura-l')
+            };
+            set(ref(db, 'finanzas_2026/capital'), data);
+            calcularPatrimonio(data);
+            alert("Capital actualizado.");
+        };
+
+        window.guardarPresupuesto = function() {
+            const data = {
+                ingDanye: obtenerVal('ing-danye'), ingLuis: obtenerVal('ing-luis'),
+                ahorro: obtenerVal('gasto-ahorro'), vac: obtenerVal('gasto-vac'),
+                arriendo: obtenerVal('gasto-arriendo'), mercado: obtenerVal('gasto-mercado'),
+                transporte: obtenerVal('gasto-transporte'), servicios: obtenerVal('gasto-servicios'),
+                telefono: obtenerVal('gasto-telefono'), tarjeta: obtenerVal('gasto-tarjeta'),
+                pastillas: obtenerVal('gasto-pastillas'), antojos: obtenerVal('gasto-antojos')
+            };
+            set(ref(db, 'finanzas_2026/presupuesto'), data);
+            ejecutarAnalisis(data);
+            alert("Presupuesto guardado y analizado.");
+        };
+
+        window.guardarMetas = function() {
+            const meses = obtenerVal('meta-meses-ahorro');
+            set(ref(db, 'finanzas_2026/metas'), { mesesAhorro: meses });
+            document.getElementById('lbl-proyeccion-ahorro').innerText = (22991.33 + (meses * 645)).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' €';
+            alert("Metas actualizadas.");
+        };
+
+        // --- FUNCIONES DE CÁLCULO ---
+
+        function calcularPatrimonio(data) {
+            // Binance USDT a Euros
+            const binanceEur = data.binance * data.tasaUsdt;
+            // Total = Bancos + Efectivo + Crypto
+            const total = data.millennium + data.wise + data.efectivo + data.diario + binanceEur;
+            document.getElementById('lbl-total-patrimonio').innerText = total.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' €';
+        }
+
+        function ejecutarAnalisis(p) {
+            const ingresos = p.ingDanye + p.ingLuis;
+            document.getElementById('lbl-total-ingresos').innerText = ingresos.toLocaleString('en-US', {minimumFractionDigits: 2});
+            
+            // Agrupación de gastos según tu Excel
+            const necesidades = p.arriendo + p.mercado + p.transporte + p.servicios + p.telefono;
+            const inversion = p.ahorro; // 645
+            const ahorroLargo = p.vac;  // 183
+            const antojos = p.antojos;
+
+            const tbody = document.getElementById('tabla-analisis');
+            tbody.innerHTML = ''; // Limpiar
+
+            const addRow = (nombre, monto, idealPct) => {
+                const pctReal = ingresos > 0 ? ((monto / ingresos) * 100) : 0;
+                const statusClass = pctReal <= (idealPct * 100) || nombre.includes("Inversión") ? 'bg-green' : 'bg-red';
+                const statusText = pctReal <= (idealPct * 100) || nombre.includes("Inversión") ? 'En Rango' : 'Alerta';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${nombre}</strong></td>
+                        <td class="text-right">${monto.toFixed(2)} €</td>
+                        <td class="text-right">${pctReal.toFixed(1)}%</td>
+                        <td class="text-right">${(idealPct * 100)}%</td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            };
+
+            // Regla del Excel
+            addRow('Necesidades Básicas', necesidades, 0.50);
+            addRow('Inversión / Ahorro Fijo', inversion, 0.10); // Superan esto por mucho en la realidad (30%)
+            addRow('Ahorro p/ Gastar (Vacaciones)', ahorroLargo, 0.10);
+            addRow('Antojos', antojos, 0.10);
+        }
+
+        // --- CARGAR DATOS DE FIREBASE EN TIEMPO REAL ---
+        function cargarDatos() {
+            
