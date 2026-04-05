@@ -6,34 +6,40 @@
 
 <style>
 body { font-family: Arial; padding:20px; }
-nav button { margin-right:10px; }
-section { display:none; margin-top:20px; }
-section.active { display:block; }
-input, select, button { margin:5px; }
+section { display:none; }
+.active { display:block; }
 </style>
 
 </head>
 
 <body>
 
+<!-- LOGIN -->
+<div id="login" class="active">
+    <h2>Login</h2>
+    <input id="user" placeholder="Usuario">
+    <input id="pass" type="password" placeholder="Contraseña">
+    <button onclick="login()">Entrar</button>
+    <p id="error" style="color:red;"></p>
+</div>
+
+<!-- APP -->
+<div id="app">
+
 <h1>Control Financiero</h1>
 
-<nav>
-    <button onclick="mostrar('cuentas')">Cuentas</button>
-    <button onclick="mostrar('movimientos')">Movimientos</button>
-    <button onclick="mostrar('resumen')">Resumen</button>
-</nav>
+<button onclick="mostrar('cuentas')">Cuentas</button>
+<button onclick="mostrar('movimientos')">Movimientos</button>
+<button onclick="mostrar('resumen')">Resumen</button>
 
-<!-- CUENTAS -->
 <section id="cuentas" class="active">
     <h2>Cuentas</h2>
-    <input id="nombreCuenta" placeholder="Nombre cuenta">
-    <input id="saldoCuenta" type="number" placeholder="Saldo">
+    <input id="nombreCuenta">
+    <input id="saldoCuenta" type="number">
     <button onclick="agregarCuenta()">Agregar</button>
     <ul id="listaCuentas"></ul>
 </section>
 
-<!-- MOVIMIENTOS -->
 <section id="movimientos">
     <h2>Movimientos</h2>
 
@@ -42,8 +48,8 @@ input, select, button { margin:5px; }
         <option value="gasto">Gasto</option>
     </select>
 
-    <input id="descripcion" placeholder="Descripción">
-    <input id="monto" type="number" placeholder="Monto">
+    <input id="descripcion">
+    <input id="monto" type="number">
     <input id="fecha" type="date">
 
     <button onclick="agregarMovimiento()">Guardar</button>
@@ -51,122 +57,113 @@ input, select, button { margin:5px; }
     <ul id="listaMovimientos"></ul>
 </section>
 
-<!-- RESUMEN -->
 <section id="resumen">
     <h2>Resumen</h2>
-    <p>Ingresos: <span id="totalIngresos">0</span>€</p>
-    <p>Gastos: <span id="totalGastos">0</span>€</p>
-    <p>Ahorro: <span id="ahorro">0</span>€</p>
+    <p>Ingresos: <span id="totalIngresos">0</span></p>
+    <p>Gastos: <span id="totalGastos">0</span></p>
+    <p>Ahorro: <span id="ahorro">0</span></p>
 </section>
+
+</div>
 
 <script type="module">
 
-// ================= FIREBASE =================
+// 🔥 FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// 🔥 TU CONFIG YA PUESTA
 const firebaseConfig = {
   apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
   authDomain: "finanzas-m-y-l.firebaseapp.com",
   databaseURL: "https://finanzas-m-y-l-default-rtdb.firebaseio.com",
-  projectId: "finanzas-m-y-l",
-  storageBucket: "finanzas-m-y-l.firebasestorage.app",
-  messagingSenderId: "590213560036",
-  appId: "1:590213560036:web:c03a20e0e207b3f60fdef1"
+  projectId: "finanzas-m-y-l"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ================= ESTADO =================
-let estado = {
-    cuentas: [],
-    movimientos: []
+// ================= LOGIN =================
+window.login = function () {
+    const user = document.getElementById("user").value;
+    const pass = document.getElementById("pass").value;
+
+    if (user === "admin" && pass === "1234") {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+    } else {
+        document.getElementById("error").innerText = "Datos incorrectos";
+    }
 };
 
-// ================= REFERENCIAS =================
+// ================= ESTADO =================
+let estado = { cuentas: [], movimientos: [] };
+
 const cuentasRef = ref(db, "cuentas");
 const movimientosRef = ref(db, "movimientos");
 
-// ================= ESCUCHA TIEMPO REAL =================
-onValue(cuentasRef, (snapshot) => {
+onValue(cuentasRef, (snap) => {
     estado.cuentas = [];
-    snapshot.forEach(child => estado.cuentas.push(child.val()));
+    snap.forEach(c => estado.cuentas.push(c.val()));
     render();
 });
 
-onValue(movimientosRef, (snapshot) => {
+onValue(movimientosRef, (snap) => {
     estado.movimientos = [];
-    snapshot.forEach(child => estado.movimientos.push(child.val()));
+    snap.forEach(m => estado.movimientos.push(m.val()));
     render();
 });
 
-// ================= UI =================
-window.mostrar = function (id) {
+// ================= FUNCIONES =================
+window.mostrar = function(id){
     document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
 };
 
-// ================= CUENTAS =================
-window.agregarCuenta = function () {
-    const nombre = document.getElementById("nombreCuenta").value;
-    const saldo = Number(document.getElementById("saldoCuenta").value);
-
-    if (!nombre) return;
-
-    push(cuentasRef, { nombre, saldo });
+window.agregarCuenta = function(){
+    push(cuentasRef, {
+        nombre: nombreCuenta.value,
+        saldo: Number(saldoCuenta.value)
+    });
 };
 
-// ================= MOVIMIENTOS =================
-window.agregarMovimiento = function () {
-    const tipo = document.getElementById("tipo").value;
-    const descripcion = document.getElementById("descripcion").value;
-    const monto = Number(document.getElementById("monto").value);
-    const fecha = document.getElementById("fecha").value;
-
-    if (!descripcion || !monto) return;
-
-    push(movimientosRef, { tipo, descripcion, monto, fecha });
+window.agregarMovimiento = function(){
+    push(movimientosRef, {
+        tipo: tipo.value,
+        descripcion: descripcion.value,
+        monto: Number(monto.value),
+        fecha: fecha.value
+    });
 };
 
 // ================= LOGICA =================
-function calcularResumen() {
-    let ingresos = 0;
-    let gastos = 0;
+function calcularResumen(){
+    let ingresos = 0, gastos = 0;
 
-    estado.movimientos.forEach(m => {
-        if (m.tipo === "ingreso") ingresos += m.monto;
-        else gastos += m.monto;
+    estado.movimientos.forEach(m=>{
+        if(m.tipo==="ingreso") ingresos+=m.monto;
+        else gastos+=m.monto;
     });
 
-    return {
-        ingresos,
-        gastos,
-        ahorro: ingresos - gastos
-    };
+    return { ingresos, gastos, ahorro: ingresos-gastos };
 }
 
 // ================= RENDER =================
-function render() {
+function render(){
 
-    const ulC = document.getElementById("listaCuentas");
-    ulC.innerHTML = "";
-    estado.cuentas.forEach(c => {
-        ulC.innerHTML += `<li>${c.nombre} - ${c.saldo}€</li>`;
+    listaCuentas.innerHTML="";
+    estado.cuentas.forEach(c=>{
+        listaCuentas.innerHTML += `<li>${c.nombre} - ${c.saldo}</li>`;
     });
 
-    const ulM = document.getElementById("listaMovimientos");
-    ulM.innerHTML = "";
-    estado.movimientos.forEach(m => {
-        ulM.innerHTML += `<li>${m.tipo} - ${m.descripcion} - ${m.monto}€</li>`;
+    listaMovimientos.innerHTML="";
+    estado.movimientos.forEach(m=>{
+        listaMovimientos.innerHTML += `<li>${m.tipo} - ${m.descripcion} - ${m.monto}</li>`;
     });
 
     const r = calcularResumen();
-    document.getElementById("totalIngresos").innerText = r.ingresos;
-    document.getElementById("totalGastos").innerText = r.gastos;
-    document.getElementById("ahorro").innerText = r.ahorro;
+    totalIngresos.innerText = r.ingresos;
+    totalGastos.innerText = r.gastos;
+    ahorro.innerText = r.ahorro;
 }
 
 </script>
