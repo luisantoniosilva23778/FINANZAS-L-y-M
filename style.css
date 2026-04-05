@@ -1,18 +1,59 @@
-* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body { margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
-.screen { display: flex; flex-direction: column; min-height: 100vh; }
-.login-box { margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
-.login-box input { display: block; width: 100%; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-.login-box button { width: 100%; padding: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; }
-header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-.btn-logout { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-nav { display: flex; background: #34495e; overflow-x: auto; }
-.tab-btn { flex: 1; padding: 15px; background: none; border: none; color: white; cursor: pointer; text-transform: uppercase; font-size: 12px; font-weight: bold; }
-.tab-btn.active { background: #1abc9c; }
-main { padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
-.card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.card label { display: block; margin-bottom: 10px; font-weight: bold; }
-.card input { padding: 8px; margin-left: 10px; width: 150px; }
-button { padding: 10px 15px; background: #2980b9; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;}
-ul { list-style: none; padding: 0; }
-ul li { background: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;}
+<style>
+body {
+    font-family: Arial;
+    padding: 20px;
+    background: #f5f7fa;
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+nav button {
+    margin-right: 10px;
+    padding: 8px 12px;
+    border: none;
+    background: #3498db;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+nav button:hover {
+    background: #2980b9;
+}
+
+section {
+    display: none;
+    margin-top: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+section.active {
+    display: block;
+}
+
+input, select {
+    margin: 5px;
+    padding: 6px;
+}
+
+button {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+#login {
+    max-width: 300px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#app {
+    display: none;
+}
+</style>
