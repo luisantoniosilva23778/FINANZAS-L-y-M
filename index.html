@@ -359,4 +359,45 @@
                     state.reservas = data.reservas || [];
                     state.gastos = data.gastos || [];
                     state.prestamos = data.prestamos || [];
-                    renderizarT
+                    renderizarTodo();
+                } else {
+                    // Inicializar con un ejemplo si la base de datos es nueva
+                    agregarFila('cuentas'); agregarFila('reservas'); agregarFila('gastos');
+                }
+            });
+        }
+
+        // --- LÓGICA DE CIERRE DE MES ---
+        window.ejecutarCierre = () => {
+            const nuevoMes = document.getElementById('input-nuevo-mes').value;
+            if(!nuevoMes) {
+                alert("Por favor, ingresa el nombre del nuevo mes.");
+                return;
+            }
+
+            if(confirm(`¿Seguro que deseas cerrar ${state.config.mesActual} e iniciar ${nuevoMes}? Los pagos parciales volverán a cero.`)) {
+                
+                // 1. Guardar historial en la base de datos (Toma una "foto" del estado actual)
+                const historialRef = ref(db, `finanzas_pro/historico/${state.config.mesActual}`);
+                set(historialRef, state);
+
+                // 2. Modificar el estado actual para el nuevo mes
+                state.config.mesActual = nuevoMes;
+                
+                // 3. Reiniciar la columna "Ya Pagué" de todos los gastos a 0
+                state.gastos = state.gastos.map(gasto => {
+                    return { ...gasto, pagado: 0 };
+                });
+
+                // 4. Guardar el nuevo estado en Firebase
+                set(ref(db, 'finanzas_pro/estado_actual'), state).then(() => {
+                    document.getElementById('input-nuevo-mes').value = '';
+                    alert(`¡Cierre exitoso! Bienvenido al ciclo de ${nuevoMes}.`);
+                    renderizarTodo();
+                    showTab('gastos');
+                });
+            }
+        };
+    </script>
+</body>
+</html>
