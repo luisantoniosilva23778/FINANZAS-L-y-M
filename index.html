@@ -3,236 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas M y L 2026 (Pro)</title>
+    <title>Finanzas PRO - Control Total</title>
     <style>
-        :root { --bg: #f4f7f6; --primary: #1e293b; --secondary: #2563eb; --accent: #10b981; --text: #334155; --card: #ffffff; --danger: #ef4444; --warning: #f59e0b; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--text); }
+        :root { --bg: #f3f4f6; --primary: #111827; --accent: #2563eb; --success: #059669; --danger: #dc2626; --card: #ffffff; --border: #e5e7eb; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--primary); padding-bottom: 40px; }
         
-        /* Login */
-        #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--primary); }
-        .login-box { background: var(--card); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 350px; text-align: center; }
-        .login-box h2 { margin-bottom: 20px; color: var(--primary); }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; }
-        .login-box button { width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        
-        /* Main Layout */
+        /* Layout */
         header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .btn-logout { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        
-        nav { display: flex; background: #fff; overflow-x: auto; white-space: nowrap; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { flex: 1; padding: 15px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: bold; color: #64748b; }
-        .tab-btn.active { border-bottom-color: var(--secondary); color: var(--secondary); }
-        
-        main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        nav { display: flex; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-weight: 600; color: #6b7280; cursor: pointer; border-bottom: 3px solid transparent; min-width: 120px; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        main { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* Grids & Cards */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        /* Componentes */
+        .card { background: var(--card); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .card h3 { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); color: var(--primary); display: flex; justify-content: space-between;}
         
-        .card { background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .card h3 { border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; color: var(--primary); }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .stat-box { padding: 20px; border-radius: 8px; color: white; text-align: center; }
+        .stat-box h2 { font-size: 2rem; margin-top: 10px; }
+        .bg-blue { background: var(--accent); } .bg-green { background: var(--success); } .bg-dark { background: var(--primary); }
+
+        /* Tablas Dinámicas (Como Excel) */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 0.9rem; }
+        th { background: #f9fafb; padding: 10px; text-align: left; border-bottom: 2px solid var(--border); color: #4b5563; }
+        td { padding: 8px; border-bottom: 1px solid var(--border); }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9rem; }
+        input:focus { outline: 2px solid var(--accent); }
         
-        .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.95rem; }
-        .form-group input { width: 120px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; }
-        .btn-save { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .col-calc { font-weight: bold; text-align: right; padding-right: 15px !important; }
+        .text-red { color: var(--danger); } .text-green { color: var(--success); }
         
-        /* Summary Boxes */
-        .summary-box { padding: 15px; border-radius: 8px; text-align: center; color: white; margin-bottom: 20px; }
-        .bg-blue { background: var(--secondary); }
-        .bg-green { background: var(--accent); }
-        .bg-dark { background: var(--primary); }
-        .summary-box h2 { font-size: 1.8rem; margin: 5px 0; }
+        /* Botones */
+        .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; color: white; }
+        .btn-add { background: #4b5563; margin-top: 10px; width: 100%; }
+        .btn-save { background: var(--accent); font-size: 1.1rem; padding: 15px; width: 100%; margin-top: 20px; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+        .btn-del { background: var(--danger); padding: 8px; width: 100%; }
+        .btn-close-month { background: var(--danger); font-size: 1.2rem; padding: 15px; width: 100%; margin-top: 20px; }
         
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 15px; }
-        table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        table th { background: #f8fafc; color: var(--primary); }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .text-red { color: var(--danger); font-weight: bold; }
-        .text-green { color: var(--accent); font-weight: bold; }
-        
-        .month-input { width: 100px; padding: 5px; text-align: right; }
+        /* Login */
+        #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--primary); position: fixed; inset: 0; z-index: 1000;}
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <div class="login-box">
-            <h2>Control Financiero</h2>
-            <input type="text" id="username" placeholder="Usuario (admin)">
-            <input type="password" id="password" placeholder="Contraseña (1234)">
-            <button onclick="window.login()">Ingresar</button>
-            <p id="login-error" style="color: #ef4444; display: none; margin-top: 10px;">Credenciales incorrectas.</p>
+        <div class="card" style="width: 350px; text-align: center;">
+            <h2 style="margin-bottom: 20px;">Finanzas M&L</h2>
+            <input type="password" id="pass" placeholder="Contraseña" style="margin-bottom: 15px; text-align:center;">
+            <button class="btn btn-save" style="margin-top: 0;" onclick="login()">Ingresar</button>
         </div>
     </div>
 
-    <div id="app-screen" style="display: none;">
+    <div id="app" style="display: none;">
         <header>
-            <h1>M & L 2026</h1>
-            <button onclick="window.logout()" class="btn-logout">Salir</button>
+            <div>
+                <h2 style="font-size: 1.2rem;">M&L Control</h2>
+                <span id="lbl-mes-actual" style="font-size: 0.9rem; opacity: 0.8;">Cargando mes...</span>
+            </div>
+            <button class="btn" style="background:var(--danger)" onclick="logout()">Salir</button>
         </header>
 
         <nav>
-            <button class="tab-btn active" onclick="window.showTab('balance')">Balance (Tenemos)</button>
-            <button class="tab-btn" onclick="window.showTab('presupuesto')">Presupuesto y Libro</button>
-            <button class="tab-btn" onclick="window.showTab('promesas')">Promesas vs Real</button>
-            <button class="tab-btn" onclick="window.showTab('historico')">Análisis Histórico</button>
+            <button class="tab-btn active" onclick="showTab('resumen')">EL TODO</button>
+            <button class="tab-btn" onclick="showTab('dinamico')">CUENTAS & POTES</button>
+            <button class="tab-btn" onclick="showTab('gastos')">GASTOS DEL MES</button>
+            <button class="tab-btn" onclick="showTab('prestamos')">PRÉSTAMOS</button>
+            <button class="tab-btn" onclick="showTab('cierre')">CIERRE</button>
         </nav>
 
         <main>
-            <section id="balance" class="tab-content active">
+            <section id="resumen" class="tab-content active">
                 <div class="grid-3">
-                    <div class="summary-box bg-blue">
-                        <p>TOTAL LIQUIDEZ (€)</p>
-                        <h2 id="lbl-liquido">0.00</h2>
+                    <div class="stat-box bg-blue">
+                        <p>TENEMOS (Liquidez Total)</p>
+                        <h2 id="total-liquidez">0.00 €</h2>
                     </div>
-                    <div class="summary-box bg-dark">
-                        <p>TOTAL COMPROMETIDO (€)</p>
-                        <h2 id="lbl-comprometido">0.00</h2>
+                    <div class="stat-box bg-dark">
+                        <p>COMPROMETIDO (Potes + Deudas)</p>
+                        <h2 id="total-comprometido">0.00 €</h2>
                     </div>
-                    <div class="summary-box bg-green">
-                        <p>CONTAMOS REALMENTE (€)</p>
-                        <h2 id="lbl-realmente">0.00</h2>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>1. Cuentas (Contamos Con)</h3>
-                        <div class="form-group"><label>Millennium</label><input type="number" id="acc-mill" step="0.01"></div>
-                        <div class="form-group"><label>Wise (D+L)</label><input type="number" id="acc-wise" step="0.01"></div>
-                        <div class="form-group"><label>Alimentación D+Cont</label><input type="number" id="acc-alim" step="0.01"></div>
-                        <div class="form-group"><label>Efectivo Uso Diario</label><input type="number" id="acc-efec-dia" step="0.01"></div>
-                        <div class="form-group"><label>Efectivo Guardado</label><input type="number" id="acc-efec-gua" step="0.01"></div>
-                        <div class="form-group"><label>Dólares Vzla (En €)</label><input type="number" id="acc-vzla" step="0.01"></div>
-                        <div class="form-group"><label>Binance (USDT)</label><input type="number" id="acc-binance" step="0.01"></div>
-                        <div class="form-group" style="border-top: 1px solid #eee; padding-top:10px;"><label>Tasa USDT a EUR</label><input type="number" id="tasa-usdt" step="0.01" value="0.85"></div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>2. Reservas (Comprometidos)</h3>
-                        <div class="form-group"><label>Reserva Vacaciones 2026</label><input type="number" id="res-vac26" step="0.01"></div>
-                        <div class="form-group"><label>Reserva Vacaciones 2027</label><input type="number" id="res-vac27" step="0.01"></div>
-                        <div class="form-group"><label>Reserva Superávit</label><input type="number" id="res-superavit" step="0.01"></div>
-                        <div class="form-group"><label>Pote Locura Danye</label><input type="number" id="res-loc-d" step="0.01"></div>
-                        <div class="form-group"><label>Pote Locura Luis</label><input type="number" id="res-loc-l" step="0.01"></div>
-                        <div class="form-group"><label>Préstamos (Mayra, etc)</label><input type="number" id="res-prestamos" step="0.01"></div>
-                        <div class="form-group"><label>Deudas / Gastos Pendientes</label><input type="number" id="res-pendientes" step="0.01"></div>
-                        <button class="btn-save" onclick="window.guardarBalance()">Calcular y Guardar Balance</button>
+                    <div class="stat-box bg-green">
+                        <p>CONTAMOS REALMENTE</p>
+                        <h2 id="total-realmente">0.00 €</h2>
                     </div>
                 </div>
             </section>
 
-            <section id="presupuesto" class="tab-content">
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Ingresos Mensuales Líquidos</h3>
-                        <div class="form-group"><label>Sueldo Danye (Liq + Alim)</label><input type="number" id="ing-danye" step="0.01" value="879"></div>
-                        <div class="form-group"><label>Sueldo Luis (Liq + Alim)</label><input type="number" id="ing-luis" step="0.01" value="1265"></div>
-                        <div class="form-group" style="border-top: 1px solid #ccc; margin-top:10px; padding-top:10px;">
-                            <label><strong>SUB TOTAL INGRESOS</strong></label><strong id="lbl-subtotal-ing">2144.00 €</strong>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>Ahorro Fijo Programado</h3>
-                        <div class="form-group"><label>Ahorro e Inversión</label><input type="number" id="gasto-ahorro" step="0.01" value="645"></div>
-                        <div class="form-group"><label>Guar. Suel. Vac. (D+L)</label><input type="number" id="gasto-vac" step="0.01" value="183"></div>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Gastos Reales del Mes</h3>
-                        <div class="form-group"><label>Arriendo</label><input type="number" id="g-arriendo" step="0.01" value="500"></div>
-                        <div class="form-group"><label>Mercado</label><input type="number" id="g-mercado" step="0.01" value="230"></div>
-                        <div class="form-group"><label>Transporte</label><input type="number" id="g-transporte" step="0.01" value="80"></div>
-                        <div class="form-group"><label>Servicios (Gas, Int, Nflx)</label><input type="number" id="g-servicios" step="0.01" value="100"></div>
-                        <div class="form-group"><label>Teléfono</label><input type="number" id="g-telefono" step="0.01" value="52"></div>
-                        <div class="form-group"><label>Pastillas y Comisiones</label><input type="number" id="g-otros" step="0.01" value="19"></div>
-                        <div class="form-group"><label>Ocio / Antojos</label><input type="number" id="g-antojos" step="0.01" value="135"></div>
-                        <div class="form-group"><label>Donaciones</label><input type="number" id="g-donaciones" step="0.01" value="0"></div>
-                        <div class="form-group"><label>Formación</label><input type="number" id="g-formacion" step="0.01" value="0"></div>
-                        <button class="btn-save" onclick="window.guardarPresupuesto()">Guardar Presupuesto</button>
-                    </div>
-
-                    <div class="card">
-                        <h3>El Libro Aconseja vs Real</h3>
-                        <table>
-                            <thead><tr><th>Categoría</th><th class="text-right">Real %</th><th class="text-right">Ideal %</th></tr></thead>
-                            <tbody id="tabla-libro">
-                                </tbody>
-                        </table>
-                        <p style="font-size:0.8rem; color:#666;">*Basado en los Ingresos Totales del mes.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="promesas" class="tab-content">
+            <section id="dinamico" class="tab-content">
                 <div class="card">
-                    <h3>Resultados Mensuales 2026 (Seguimiento Ahorro)</h3>
-                    <p style="margin-bottom: 15px;">Cuadro para comparar la meta mensual (+645€) con el capital real alcanzado en Activos.</p>
-                    <div style="overflow-x: auto;">
+                    <h3>1. Nuestras Cuentas (Suma a Liquidez)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Cuenta / Origen</th><th>Monto (€)</th><th>Acción</th></tr></thead>
+                            <tbody id="body-cuentas"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-add" onclick="agregarFila('cuentas')">+ Añadir Cuenta o Ingreso</button>
+                </div>
+
+                <div class="card">
+                    <h3>2. Nuestros Potes / Reservas (Suma a Comprometido)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Nombre de Reserva</th><th>Monto (€)</th><th>Acción</th></tr></thead>
+                            <tbody id="body-reservas"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-add" onclick="agregarFila('reservas')">+ Añadir Reserva o Pote</button>
+                </div>
+                <button class="btn btn-save" onclick="guardarDatos()">Guardar Cambios y Calcular</button>
+            </section>
+
+            <section id="gastos" class="tab-content">
+                <div class="card">
+                    <h3>Control de Gastos (Lo que falta se suma a Comprometido)</h3>
+                    <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Mes</th>
-                                    <th class="text-right">Promesa Inicial</th>
-                                    <th class="text-right">Resultado Alcanzado</th>
-                                    <th class="text-right">Diferencia</th>
-                                    <th class="text-center">Estado</th>
+                                    <th style="width:25%">Descripción</th>
+                                    <th style="width:15%">Total a Pagar</th>
+                                    <th style="width:15%">Ya Pagué</th>
+                                    <th style="width:15%">Resta</th>
+                                    <th style="width:25%">Observaciones</th>
+                                    <th style="width:5%">Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-promesas">
-                                </tbody>
+                            <tbody id="body-gastos"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" style="text-align:right; font-weight:bold;">Total Pendiente por Pagar:</td>
+                                    <td class="col-calc text-red" id="sum-gastos-pendientes">0.00 €</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
-                    <button class="btn-save" onclick="window.guardarPromesas()">Guardar Meses Alcanzados</button>
+                    <button class="btn btn-add" onclick="agregarFila('gastos')">+ Añadir Gasto</button>
+                    <button class="btn btn-save" onclick="guardarDatos()">Guardar Gastos y Calcular</button>
                 </div>
             </section>
 
-            <section id="historico" class="tab-content">
+            <section id="prestamos" class="tab-content">
                 <div class="card">
-                    <h3>Cálculo de Ahorro Desde que Emigramos</h3>
-                    <div class="grid-3" style="margin-bottom: 20px;">
-                        <div style="background:#f8fafc; padding:10px; border-radius:5px;">
-                            <strong>Caso 1: Ritmo Real</strong><br>
-                            <span id="lbl-caso1">474.70 € / mes</span>
-                        </div>
-                        <div style="background:#f8fafc; padding:10px; border-radius:5px;">
-                            <strong>Caso 2: Mínimo 10%</strong><br>
-                            <span id="lbl-caso2">151.68 € / mes</span>
-                        </div>
-                        <div style="background:#d1fae5; padding:10px; border-radius:5px;">
-                            <strong>Caso 3: Promedio Actual</strong><br>
-                            <span id="lbl-caso3" class="text-green">Calculando...</span>
-                        </div>
+                    <h3>Control de Préstamos (Lo que nos deben o debemos)</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:25%">Persona / Entidad</th>
+                                    <th style="width:15%">Monto Inicial</th>
+                                    <th style="width:15%">Abonado</th>
+                                    <th style="width:15%">Falta</th>
+                                    <th style="width:25%">Observaciones</th>
+                                    <th style="width:5%">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-prestamos"></tbody>
+                        </table>
                     </div>
+                    <button class="btn btn-add" onclick="agregarFila('prestamos')">+ Añadir Préstamo</button>
+                    <button class="btn btn-save" onclick="guardarDatos()">Guardar Préstamos y Calcular</button>
+                </div>
+            </section>
+
+            <section id="cierre" class="tab-content">
+                <div class="card">
+                    <h3 class="text-red">Cierre de Mes y Reinicio de Ciclo</h3>
+                    <p style="margin-bottom: 20px;">Al presionar este botón, el sistema tomará todos tus gastos actuales y devolverá la columna "Ya Pagué" a 0. Las cuentas y reservas se mantendrán intactas, y se iniciará un nuevo ciclo de cobro/pago para el siguiente mes.</p>
                     
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Análisis Comparativo</th>
-                                <th class="text-right">Resultado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Aho. Pro. Real (Caso 3) Vs Ritmo Real Histórico (Caso 1)</td>
-                                <td class="text-right" id="lbl-vs-caso1">--</td>
-                            </tr>
-                            <tr>
-                                <td>Aho. Pro. Real (Caso 3) Vs Mínimo 10% del Libro (Caso 2)</td>
-                                <td class="text-right" id="lbl-vs-caso2">--</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p style="font-size:0.8rem; color:#666;">*El Caso 3 se calcula automáticamente tomando el "Contamos Realmente" actual dividido entre el total de meses desde que emigraron (Aprox 97.6 meses).</p>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; display:block; margin-bottom: 5px;">Siguiente Mes (Ej: Abril 2026)</label>
+                        <input type="text" id="input-nuevo-mes" placeholder="Escribe el nombre del nuevo mes">
+                    </div>
+
+                    <button class="btn btn-close-month" onclick="ejecutarCierre()">EJECUTAR CIERRE DE MES</button>
                 </div>
             </section>
         </main>
@@ -240,7 +190,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
@@ -248,222 +198,165 @@
             databaseURL: "https://finanzas-m-y-l-default-rtdb.firebaseio.com",
             projectId: "finanzas-m-y-l",
             storageBucket: "finanzas-m-y-l.firebasestorage.app",
-            messagingSenderId: "590213560036",
             appId: "1:590213560036:web:c03a20e0e207b3f60fdef1"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- SISTEMA DE TABS Y LOGIN ---
-        window.login = function() {
-            if(document.getElementById("username").value === "admin" && document.getElementById("password").value === "1234") {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("app-screen").style.display = "block";
-                generarTablaPromesas();
-                cargarDatos();
-            } else {
-                document.getElementById("login-error").style.display = "block";
-            }
+        // --- ESTADO GLOBAL (La "Memoria" del Excel) ---
+        let state = {
+            config: { mesActual: "Marzo 2026" },
+            cuentas: [],
+            reservas: [],
+            gastos: [],
+            prestamos: []
         };
 
-        window.logout = function() {
-            document.getElementById("app-screen").style.display = "none";
-            document.getElementById("login-screen").style.display = "flex";
-            document.getElementById("username").value = "";
-            document.getElementById("password").value = "";
+        // --- LÓGICA DE INTERFAZ ---
+        window.login = () => {
+            if(document.getElementById('pass').value === '1234') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                cargarDatosDeFirebase();
+            } else { alert('Contraseña incorrecta'); }
         };
 
-        window.showTab = function(tabId) {
+        window.logout = () => { window.location.reload(); };
+
+        window.showTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            event.target.classList.add('active');
+            renderizarTodo(); // Recalcular al cambiar de pestaña
         };
 
-        // --- HELPERS ---
-        function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
-        function setVal(id, val) { if(val !== undefined) document.getElementById(id).value = val; }
-        function formatCur(val) { return val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits:2}); }
-
-        // --- VARIABLES GLOBALES PARA CÁLCULOS CRUZADOS ---
-        let globalRealmente = 0;
-
-        // --- 1. LÓGICA BALANCE ---
-        window.guardarBalance = function() {
-            const data = {
-                accMill: getVal('acc-mill'), accWise: getVal('acc-wise'), accAlim: getVal('acc-alim'),
-                accEfecDia: getVal('acc-efec-dia'), accEfecGua: getVal('acc-efec-gua'), accVzla: getVal('acc-vzla'),
-                accBinance: getVal('acc-binance'), tasaUsdt: getVal('tasa-usdt'),
-                resVac26: getVal('res-vac26'), resVac27: getVal('res-vac27'), resSuperavit: getVal('res-superavit'),
-                resLocD: getVal('res-loc-d'), resLocL: getVal('res-loc-l'), resPrestamos: getVal('res-prestamos'),
-                resPendientes: getVal('res-pendientes')
-            };
-            set(ref(db, 'finanzas_excel/balance'), data);
-            calcularBalance(data);
-            alert("Balance Guardado y Sincronizado.");
+        // --- MANEJO DE TABLAS DINÁMICAS (Equivalente a agregar filas en Excel) ---
+        window.agregarFila = (tipo) => {
+            if(tipo === 'cuentas' || tipo === 'reservas') {
+                state[tipo].push({ nombre: '', monto: 0 });
+            } else if(tipo === 'gastos') {
+                state.gastos.push({ desc: '', total: 0, pagado: 0, obs: '' });
+            } else if(tipo === 'prestamos') {
+                state.prestamos.push({ nombre: '', inicial: 0, abonado: 0, obs: '' });
+            }
+            renderizarTodo();
         };
 
-        function calcularBalance(d) {
-            const binanceEur = d.accBinance * d.tasaUsdt;
-            const liquido = d.accMill + d.accWise + d.accAlim + d.accEfecDia + d.accEfecGua + d.accVzla + binanceEur;
-            const comprometido = d.resVac26 + d.resVac27 + d.resSuperavit + d.resLocD + d.resLocL + d.resPrestamos + d.resPendientes;
-            const realmente = liquido - comprometido;
-            
-            globalRealmente = realmente;
-
-            document.getElementById('lbl-liquido').innerText = formatCur(liquido);
-            document.getElementById('lbl-comprometido').innerText = formatCur(comprometido);
-            document.getElementById('lbl-realmente').innerText = formatCur(realmente);
-
-            calcularHistorico(); // Actualiza pestaña histórico basado en el capital real actual
-        }
-
-        // --- 2. LÓGICA PRESUPUESTO Y LIBRO ---
-        window.guardarPresupuesto = function() {
-            const data = {
-                ingDanye: getVal('ing-danye'), ingLuis: getVal('ing-luis'),
-                ahorro: getVal('gasto-ahorro'), vac: getVal('gasto-vac'),
-                arriendo: getVal('g-arriendo'), mercado: getVal('g-mercado'), trans: getVal('g-transporte'),
-                serv: getVal('g-servicios'), tel: getVal('g-telefono'), otros: getVal('g-otros'),
-                antojos: getVal('g-antojos'), donaciones: getVal('g-donaciones'), formacion: getVal('g-formacion')
-            };
-            set(ref(db, 'finanzas_excel/presupuesto'), data);
-            calcularLibro(data);
-            alert("Presupuesto Guardado.");
+        window.eliminarFila = (tipo, index) => {
+            state[tipo].splice(index, 1);
+            renderizarTodo();
         };
 
-        function calcularLibro(d) {
-            const totalIngresos = d.ingDanye + d.ingLuis;
-            document.getElementById('lbl-subtotal-ing').innerText = formatCur(totalIngresos) + ' €';
+        // --- MOTOR DE RENDERIZADO Y CÁLCULO (Equivalente a las fórmulas de Excel) ---
+        window.actualizarValor = (tipo, index, campo, valor) => {
+            if(campo === 'nombre' || campo === 'desc' || campo === 'obs') {
+                state[tipo][index][campo] = valor;
+            } else {
+                state[tipo][index][campo] = parseFloat(valor) || 0;
+            }
+            renderizarTodo(); // Calcula automáticamente al escribir
+        };
 
-            const necBasicas = d.arriendo + d.mercado + d.trans + d.serv + d.tel + d.otros;
-            
-            const renderRow = (nombre, monto, ideal) => {
-                const pct = totalIngresos > 0 ? (monto / totalIngresos) * 100 : 0;
-                let colorClass = "";
-                if(nombre.includes("Inversión") || nombre.includes("Largo Plazo")) {
-                    colorClass = pct >= ideal ? "text-green" : "text-red";
-                } else {
-                    colorClass = pct <= ideal ? "text-green" : "text-red";
-                }
-                return `<tr>
-                    <td>${nombre}</td>
-                    <td class="text-right ${colorClass}">${pct.toFixed(2)}%</td>
-                    <td class="text-right">${ideal}%</td>
-                </tr>`;
-            };
+        function renderizarTodo() {
+            document.getElementById('lbl-mes-actual').innerText = "Mes Activo: " + state.config.mesActual;
 
-            document.getElementById('tabla-libro').innerHTML = 
-                renderRow('Necesidades Básicas (50%)', necBasicas, 50) +
-                renderRow('Inversiones / Ahorro Fijo (10%)', d.ahorro, 10) +
-                renderRow('Ahorro Largo Plazo / Vacaciones (10%)', d.vac, 10) +
-                renderRow('Ocio / Antojos (10%)', d.antojos, 10) +
-                renderRow('Donaciones (10%)', d.donaciones, 10) +
-                renderRow('Formación (10%)', d.formacion, 10);
-        }
+            let sumLiquidez = 0;
+            let sumReservas = 0;
+            let sumGastosPendientes = 0;
+            let sumPrestamosPendientes = 0;
 
-        // --- 3. LÓGICA PROMESAS VS REAL ---
-        const mesesNombres = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const promesaBase = 22991.33; // Inicio Enero
-        const incrementoMensual = 645;
-
-        function generarTablaPromesas() {
-            let html = "";
-            for(let i=0; i<12; i++) {
-                const promesaMes = promesaBase + (i * incrementoMensual);
-                html += `
+            // Render Cuentas
+            const tbodyCuentas = document.getElementById('body-cuentas');
+            tbodyCuentas.innerHTML = '';
+            state.cuentas.forEach((item, i) => {
+                sumLiquidez += item.monto;
+                tbodyCuentas.innerHTML += `
                     <tr>
-                        <td><strong>${mesesNombres[i]}</strong></td>
-                        <td class="text-right">${formatCur(promesaMes)} €</td>
-                        <td class="text-right"><input type="number" class="month-input" id="alcanzado-${i}" placeholder="Real"></td>
-                        <td class="text-right" id="dif-${i}">--</td>
-                        <td class="text-center" id="estado-${i}">--</td>
-                    </tr>
-                `;
-            }
-            document.getElementById('tabla-promesas').innerHTML = html;
+                        <td><input type="text" value="${item.nombre}" oninput="actualizarValor('cuentas', ${i}, 'nombre', this.value)"></td>
+                        <td><input type="number" value="${item.monto}" oninput="actualizarValor('cuentas', ${i}, 'monto', this.value)"></td>
+                        <td><button class="btn btn-del" onclick="eliminarFila('cuentas', ${i})">X</button></td>
+                    </tr>`;
+            });
+
+            // Render Reservas
+            const tbodyReservas = document.getElementById('body-reservas');
+            tbodyReservas.innerHTML = '';
+            state.reservas.forEach((item, i) => {
+                sumReservas += item.monto;
+                tbodyReservas.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.nombre}" oninput="actualizarValor('reservas', ${i}, 'nombre', this.value)"></td>
+                        <td><input type="number" value="${item.monto}" oninput="actualizarValor('reservas', ${i}, 'monto', this.value)"></td>
+                        <td><button class="btn btn-del" onclick="eliminarFila('reservas', ${i})">X</button></td>
+                    </tr>`;
+            });
+
+            // Render Gastos
+            const tbodyGastos = document.getElementById('body-gastos');
+            tbodyGastos.innerHTML = '';
+            state.gastos.forEach((item, i) => {
+                let resta = item.total - item.pagado;
+                if(resta < 0) resta = 0; // Evitar saldos negativos irreales en gastos
+                sumGastosPendientes += resta;
+                let colorClass = resta > 0 ? 'text-red' : 'text-green';
+                
+                tbodyGastos.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.desc}" oninput="actualizarValor('gastos', ${i}, 'desc', this.value)"></td>
+                        <td><input type="number" value="${item.total}" oninput="actualizarValor('gastos', ${i}, 'total', this.value)"></td>
+                        <td><input type="number" value="${item.pagado}" oninput="actualizarValor('gastos', ${i}, 'pagado', this.value)"></td>
+                        <td class="col-calc ${colorClass}">${resta.toFixed(2)} €</td>
+                        <td><input type="text" value="${item.obs}" oninput="actualizarValor('gastos', ${i}, 'obs', this.value)"></td>
+                        <td><button class="btn btn-del" onclick="eliminarFila('gastos', ${i})">X</button></td>
+                    </tr>`;
+            });
+            document.getElementById('sum-gastos-pendientes').innerText = sumGastosPendientes.toFixed(2) + ' €';
+
+            // Render Préstamos (Asumimos que son préstamos que otorgaron y restan liquidez, o deudas que suman a comprometido)
+            // Para mantener la lógica general: Falta = Inicial - Abonado. Lo sumaremos a "Comprometido" (Dinero que falta cobrar/pagar)
+            const tbodyPrestamos = document.getElementById('body-prestamos');
+            tbodyPrestamos.innerHTML = '';
+            state.prestamos.forEach((item, i) => {
+                let resta = item.inicial - item.abonado;
+                sumPrestamosPendientes += resta;
+                
+                tbodyPrestamos.innerHTML += `
+                    <tr>
+                        <td><input type="text" value="${item.nombre}" oninput="actualizarValor('prestamos', ${i}, 'nombre', this.value)"></td>
+                        <td><input type="number" value="${item.inicial}" oninput="actualizarValor('prestamos', ${i}, 'inicial', this.value)"></td>
+                        <td><input type="number" value="${item.abonado}" oninput="actualizarValor('prestamos', ${i}, 'abonado', this.value)"></td>
+                        <td class="col-calc">${resta.toFixed(2)} €</td>
+                        <td><input type="text" value="${item.obs}" oninput="actualizarValor('prestamos', ${i}, 'obs', this.value)"></td>
+                        <td><button class="btn btn-del" onclick="eliminarFila('prestamos', ${i})">X</button></td>
+                    </tr>`;
+            });
+
+            // ACTUALIZAR "EL TODO"
+            const totalComprometido = sumReservas + sumGastosPendientes + sumPrestamosPendientes;
+            const contamosRealmente = sumLiquidez - totalComprometido;
+
+            document.getElementById('total-liquidez').innerText = sumLiquidez.toFixed(2) + ' €';
+            document.getElementById('total-comprometido').innerText = totalComprometido.toFixed(2) + ' €';
+            document.getElementById('total-realmente').innerText = contamosRealmente.toFixed(2) + ' €';
         }
 
-        window.guardarPromesas = function() {
-            let datosMeses = {};
-            for(let i=0; i<12; i++) {
-                let val = document.getElementById(`alcanzado-${i}`).value;
-                if(val !== "") datosMeses[i] = parseFloat(val);
-            }
-            set(ref(db, 'finanzas_excel/promesas'), datosMeses);
-            calcularPromesas(datosMeses);
-            alert("Progreso Mensual Guardado.");
+        // --- FIREBASE SYNC ---
+        window.guardarDatos = () => {
+            set(ref(db, 'finanzas_pro/estado_actual'), state).then(() => {
+                alert("Datos guardados y sincronizados correctamente.");
+            });
         };
 
-        function calcularPromesas(datosMeses) {
-            for(let i=0; i<12; i++) {
-                if(datosMeses[i] !== undefined) {
-                    document.getElementById(`alcanzado-${i}`).value = datosMeses[i];
-                    const promesaMes = promesaBase + (i * incrementoMensual);
-                    const dif = datosMeses[i] - promesaMes;
-                    document.getElementById(`dif-${i}`).innerText = formatCur(dif) + ' €';
-                    
-                    let estado = dif >= 0 ? '<span style="color:green;font-weight:bold">SUPERÁVIT</span>' : '<span style="color:red;font-weight:bold">DÉFICIT</span>';
-                    if (dif === 0) estado = '<span style="color:gray;font-weight:bold">NEUTRO</span>';
-                    document.getElementById(`estado-${i}`).innerHTML = estado;
-                }
-            }
-        }
-
-        // --- 4. LÓGICA ANÁLISIS HISTÓRICO ---
-        function calcularHistorico() {
-            // Meses totales estimados desde el Excel (97.6)
-            const mesesTotales = 97.66; 
-            const promCaso1 = 474.70; // Hardcoded from your historical math
-            const promCaso2 = 151.68; // Hardcoded minimum 10%
-            
-            // Caso 3 se alimenta del "Contamos Realmente" actual
-            const promCaso3 = globalRealmente > 0 ? (globalRealmente / mesesTotales) : 0;
-            document.getElementById('lbl-caso3').innerText = formatCur(promCaso3) + ' € / mes';
-
-            // Porcentajes de diferencia
-            if(promCaso3 > 0) {
-                const vsCaso1 = ((promCaso3 - promCaso1) / promCaso1) * 100;
-                const vsCaso2 = ((promCaso3 - promCaso2) / promCaso2) * 100;
-                
-                document.getElementById('lbl-vs-caso1').innerHTML = vsCaso1 >= 0 ? `<span class="text-green">+${vsCaso1.toFixed(2)}%</span>` : `<span class="text-red">${vsCaso1.toFixed(2)}%</span>`;
-                document.getElementById('lbl-vs-caso2').innerHTML = vsCaso2 >= 0 ? `<span class="text-green">+${vsCaso2.toFixed(2)}%</span>` : `<span class="text-red">${vsCaso2.toFixed(2)}%</span>`;
-            }
-        }
-
-        // --- CARGA INICIAL DE DATOS FIREBASE ---
-        function cargarDatos() {
-            onValue(ref(db, 'finanzas_excel/balance'), (snapshot) => {
+        function cargarDatosDeFirebase() {
+            onValue(ref(db, 'finanzas_pro/estado_actual'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    setVal('acc-mill', data.accMill); setVal('acc-wise', data.accWise); setVal('acc-alim', data.accAlim);
-                    setVal('acc-efec-dia', data.accEfecDia); setVal('acc-efec-gua', data.accEfecGua); setVal('acc-vzla', data.accVzla);
-                    setVal('acc-binance', data.accBinance); setVal('tasa-usdt', data.tasaUsdt);
-                    setVal('res-vac26', data.resVac26); setVal('res-vac27', data.resVac27); setVal('res-superavit', data.resSuperavit);
-                    setVal('res-loc-d', data.resLocD); setVal('res-loc-l', data.resLocL); setVal('res-prestamos', data.resPrestamos);
-                    setVal('res-pendientes', data.resPendientes);
-                    calcularBalance(data);
-                }
-            });
-
-            onValue(ref(db, 'finanzas_excel/presupuesto'), (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    setVal('ing-danye', data.ingDanye); setVal('ing-luis', data.ingLuis);
-                    setVal('gasto-ahorro', data.ahorro); setVal('gasto-vac', data.vac);
-                    setVal('g-arriendo', data.arriendo); setVal('g-mercado', data.mercado); setVal('g-transporte', data.trans);
-                    setVal('g-servicios', data.serv); setVal('g-telefono', data.tel); setVal('g-otros', data.otros);
-                    setVal('g-antojos', data.antojos); setVal('g-donaciones', data.donaciones); setVal('g-formacion', data.formacion);
-                    calcularLibro(data);
-                }
-            });
-
-            onValue(ref(db, 'finanzas_excel/promesas'), (snapshot) => {
-                const data = snapshot.val();
-                if(data) calcularPromesas(data);
-            });
-        }
-    </script>
-</body>
-</html>
+                    // Asegurar que las matrices existan aunque vengan vacías de Firebase
+                    state.config = data.config || { mesActual: "Marzo 2026" };
+                    state.cuentas = data.cuentas || [];
+                    state.reservas = data.reservas || [];
+                    state.gastos = data.gastos || [];
+                    state.prestamos = data.prestamos || [];
+                    renderizarT
