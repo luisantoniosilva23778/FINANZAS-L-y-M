@@ -105,7 +105,8 @@
                         <ul class="stat-list" id="lista-cobrar"></ul>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-header bg-green"><p>Contamos Realmente</p><h2 id="dash-real">0.00 €</h2></div>
+                        <div class="stat-header bg-green"><p>Contamos Realmente</p></div>
+                        <ul class="stat-list" id="lista-real"></ul>
                     </div>
                 </div>
             </section>
@@ -117,6 +118,7 @@
                         <table>
                             <thead><tr><th>Nombre</th><th>Moneda</th><th>Saldo Inicial</th><th>Saldo Actual</th><th>Eq. Euros</th><th>Acciones</th></tr></thead>
                             <tbody id="body-cuentas"></tbody>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-cuentas-saldo" style="font-weight:bold;">0.00</td><td id="tot-cuentas-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('cuentas')">+ Nueva Cuenta</button>
@@ -213,6 +215,7 @@
                         <table>
                             <thead><tr><th>Nombre Reserva</th><th>Moneda</th><th>Saldo Inicial</th><th>Saldo Actual</th><th>Eq. Euros</th><th>Acciones</th></tr></thead>
                             <tbody id="body-potes"></tbody>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-potes-saldo" style="font-weight:bold;">0.00</td><td id="tot-potes-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('potes')">+ Nuevo Pote</button>
@@ -227,6 +230,7 @@
                         <table>
                             <thead><tr><th>Deudor</th><th>Moneda</th><th>Monto Inicial</th><th>Cobrado</th><th>Falta Cobrar</th><th>Eq. Euros (Falta)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-prestamos"></tbody>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-pre-cobrado" style="font-weight:bold; color:var(--s);">0.00</td><td id="tot-pre-falta" style="font-weight:bold; color:var(--d);">0.00</td><td id="tot-pre-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo Préstamo</button>
@@ -242,6 +246,7 @@
                         <table>
                             <thead><tr><th>Persona / Fondo</th><th>Saldo Inicial (€)</th><th>Saldo Actual (€)</th><th>Equivalente en USD ($)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-venezuela"></tbody>
+                            <tfoot><tr><td colspan="2" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-vzla-eur" style="font-weight:bold;">0.00 €</td><td id="tot-vzla-usd" style="font-weight:bold; color:var(--s);">$ 0.00</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('venezuela')">+ Nuevo Fondo Vzla (Ej: Danyela, Luis)</button>
@@ -455,6 +460,7 @@
             
             let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0;
             let sumBaseIngresos = 0, sumBaseGastos = 0;
+            let totCuentasSaldo = 0, totPotesSaldo = 0, totPreCobrado = 0, totPreFalta = 0, totVzlaEur = 0, totVzlaUsd = 0;
             
             let htmlLiq = "", htmlComp = "", htmlCobrar = "";
 
@@ -473,8 +479,8 @@
                     
                     if(type === 'saldo') {
                         let eqEur = toEur(c.saldo, item.moneda);
-                        if(cat === 'cuentas') { eqLiquidez += eqEur; htmlLiq += `<li><span>${item.nombre||'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
-                        if(cat === 'potes') { eqPotes += eqEur; htmlComp += `<li><span>Pote: ${item.nombre||'Reserva'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
+                        if(cat === 'cuentas') { eqLiquidez += eqEur; totCuentasSaldo += c.saldo; htmlLiq += `<li><span>${item.nombre||'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
+                        if(cat === 'potes') { eqPotes += eqEur; totPotesSaldo += c.saldo; htmlComp += `<li><span>Pote: ${item.nombre||'Reserva'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
 
                         tbody.innerHTML += `
                             <tr>
@@ -516,6 +522,8 @@
                     } else if (type === 'prestamo') {
                         let eqEurResta = toEur(c.resta, item.moneda);
                         eqPorCobrar += eqEurResta;
+                        totPreCobrado += c.ejecutado;
+                        totPreFalta += c.resta;
                         if(eqEurResta > 0) htmlCobrar += `<li><span>${item.nombre||'Deudor'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
 
                         tbody.innerHTML += `
@@ -548,6 +556,8 @@
                 state.venezuela.forEach((item, i) => {
                     const c = calcularSaldo(item, 'venezuela');
                     let eqUsd = c.saldo / (state.config.tasaUsd || 1);
+                    totVzlaEur += c.saldo;
+                    totVzlaUsd += eqUsd;
                     tbodyVzla.innerHTML += `
                         <tr>
                             <td><input type="text" value="${item.nombre}" placeholder="Ej: Danyela" onchange="window.actualizarCampo('venezuela', ${i}, 'nombre', this.value)"></td>
@@ -562,6 +572,25 @@
                 });
             }
 
+            // Actualizar Totales Tablas
+            if(document.getElementById('tot-cuentas-saldo')) {
+                document.getElementById('tot-cuentas-saldo').innerText = fCur(totCuentasSaldo);
+                document.getElementById('tot-cuentas-eur').innerText = fCur(eqLiquidez) + ' €';
+            }
+            if(document.getElementById('tot-potes-saldo')) {
+                document.getElementById('tot-potes-saldo').innerText = fCur(totPotesSaldo);
+                document.getElementById('tot-potes-eur').innerText = fCur(eqPotes) + ' €';
+            }
+            if(document.getElementById('tot-pre-cobrado')) {
+                document.getElementById('tot-pre-cobrado').innerText = fCur(totPreCobrado);
+                document.getElementById('tot-pre-falta').innerText = fCur(totPreFalta);
+                document.getElementById('tot-pre-eur').innerText = fCur(eqPorCobrar) + ' €';
+            }
+            if(document.getElementById('tot-vzla-eur')) {
+                document.getElementById('tot-vzla-eur').innerText = fCur(totVzlaEur) + ' €';
+                document.getElementById('tot-vzla-usd').innerText = '$ ' + fCur(totVzlaUsd);
+            }
+
             // --- LÓGICA DE BALANCE AVANZADO ---
             const eqComprometidoTotal = eqPotes + eqGastosPendientes;
             const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
@@ -573,7 +602,12 @@
             document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' €';
             document.getElementById('dash-comp').innerText = fCur(eqComprometidoTotal) + ' €';
             document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
-            document.getElementById('dash-real').innerText = fCur(eqLiquidez - eqComprometidoTotal) + ' €';
+            document.getElementById('lista-real').innerHTML = `
+                <li><span>Liq - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez - eqComprometidoTotal)} €</strong></li>
+                <li><span>Liq + Cobrar - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqComprometidoTotal)} €</strong></li>
+                <li><span>Liq - Gastos:</span> <strong>${fCur(eqLiquidez - eqGastosPendientes)} €</strong></li>
+                <li><span>Liq + Cobrar - Gastos:</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqGastosPendientes)} €</strong></li>
+            `;
             
             document.getElementById('lista-liq').innerHTML = htmlLiq || "<li>Sin cuentas</li>";
             document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al día</li>";
@@ -624,10 +658,15 @@
                 lista.innerHTML = '';
                 if(data) {
                     Object.keys(data).forEach(mesKey => {
+                        let btnPdf = data[mesKey].pdfArchivado ? `<a href="${data[mesKey].pdfArchivado}" download="Respaldo_${mesKey}.pdf" style="text-decoration:none; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:var(--a); color:white; margin-right:5px;">📄 Ver PDF</a>` : '';
+                        
                         lista.innerHTML += `
                         <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
                             <strong>${mesKey}</strong>
-                            <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
+                            <div>
+                                ${btnPdf}
+                                <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
+                            </div>
                         </li>`;
                     });
                 } else {
@@ -667,15 +706,24 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            // Genera el PDF pasando la variable HTML directo (Soluciona el PDF en blanco)
-            html2pdf().set(opt).from(html).save().then(() => {
-                if(tipo === 'Final') {
-                    const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
-                    set(refHistorial, state).then(() => {
-                        window.cargarHistoricos(); // Refresca la lista visual
+            // Usamos un elemento DOM para evitar el PDF en blanco
+            element.innerHTML = html;
+            
+            if(tipo === 'Parcial') {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                // Si es final, convertimos el PDF a Base64 y lo anidamos en la base de datos
+                html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+                    state.pdfArchivado = pdf.output('datauristring'); // Guardar Base64
+                    
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
+                        set(refHistorial, state).then(() => {
+                            window.cargarHistoricos();
+                        });
                     });
-                }
-            });
+                });
+            }
         };
 
         window.ejecutarCierre = () => {
@@ -686,12 +734,13 @@
                 
                 window.generarReportePDF('Final');
 
-                // Esperamos un momento para que se genere el PDF antes de resetear
+                // Damos tiempo extra para que el PDF Base64 se genere y guarde en la BD
                 setTimeout(() => {
                     state.gastos.forEach(g => { g.movs = g.movs.filter(m => m.tipo !== 'Pago'); });
                     state.ingresos.forEach(i => { i.movs = i.movs.filter(m => m.tipo !== 'Recibido'); });
                     
                     state.config.mes = nuevoMes;
+                    delete state.pdfArchivado; // Limpiamos el PDF del mes activo para no sobrecargar
                     
                     set(ref(db, 'finanzas_master/estado'), state).then(() => {
                         document.getElementById('in-nuevo-mes').value = '';
