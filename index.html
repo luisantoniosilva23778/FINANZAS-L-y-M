@@ -65,7 +65,7 @@
     <div id="login-screen">
         <div class="card" style="width: 320px; text-align: center;">
             <h2 style="margin-bottom: 15px; color: var(--p);">Acceso PRO</h2>
-            <input type="password" id="pass" placeholder="Contraseña (1234)" style="margin-bottom: 15px; text-align: center;">
+            <input type="password" id="pass" placeholder="ContraseÃ±a (1234)" style="margin-bottom: 15px; text-align: center;">
             <button class="btn btn-save-main" style="margin-top:0;" onclick="window.login()">Ingresar</button>
         </div>
     </div>
@@ -74,7 +74,7 @@
         <header>
             <h3>M&L Control Maestro</h3>
             <div>
-                <button class="btn-export" onclick="window.exportarExcel()">📥 Bajar Excel</button>
+                <button class="btn-export" onclick="window.exportarExcel()">ðŸ“¥ Bajar Excel</button>
                 <span id="header-mes" style="margin-left: 15px; font-weight:bold;"></span>
             </div>
         </header>
@@ -84,7 +84,7 @@
             <button class="tab-btn" onclick="window.showTab('cuentas')">CUENTAS</button>
             <button class="tab-btn" onclick="window.showTab('compromisos')">COMPROMISOS MENS.</button>
             <button class="tab-btn" onclick="window.showTab('potes')">POTES</button>
-            <button class="tab-btn" onclick="window.showTab('prestamos')">PRÉSTAMOS</button>
+            <button class="tab-btn" onclick="window.showTab('prestamos')">PRÃ‰STAMOS</button>
             <button class="tab-btn" onclick="window.showTab('venezuela')">VENEZUELA</button>
             <button class="tab-btn" onclick="window.showTab('config')">CONFIG</button>
         </nav>
@@ -93,15 +93,15 @@
             <section id="resumen" class="tab-content active">
                 <div class="grid-dashboard">
                     <div class="stat-box">
-                        <div class="stat-header bg-blue"><p>Líquidez Total</p><h2 id="dash-liq">0.00 €</h2></div>
+                        <div class="stat-header bg-blue"><p>LÃ­quidez Total</p><h2 id="dash-liq">0.00 â‚¬</h2></div>
                         <ul class="stat-list" id="lista-liq"></ul>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-header bg-dark"><p>Comprometido (Potes + Gastos)</p><h2 id="dash-comp">0.00 €</h2></div>
+                        <div class="stat-header bg-dark"><p>Comprometido (Potes + Gastos)</p><h2 id="dash-comp">0.00 â‚¬</h2></div>
                         <ul class="stat-list" id="lista-comp"></ul>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-header bg-gray"><p>Por Cobrar (Préstamos)</p><h2 id="dash-cobrar">0.00 €</h2></div>
+                        <div class="stat-header bg-gray"><p>Por Cobrar (PrÃ©stamos)</p><h2 id="dash-cobrar">0.00 â‚¬</h2></div>
                         <ul class="stat-list" id="lista-cobrar"></ul>
                     </div>
                     <div class="stat-box">
@@ -118,7 +118,7 @@
                         <table>
                             <thead><tr><th>Nombre</th><th>Moneda</th><th>Saldo Inicial</th><th>Saldo Actual</th><th>Eq. Euros</th><th>Acciones</th></tr></thead>
                             <tbody id="body-cuentas"></tbody>
-                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-cuentas-saldo" style="font-weight:bold;">0.00</td><td id="tot-cuentas-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-cuentas-saldo" style="font-weight:bold;">0.00</td><td id="tot-cuentas-eur" style="font-weight:bold; color:var(--a);">0.00 â‚¬</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('cuentas')">+ Nueva Cuenta</button>
@@ -132,9 +132,9 @@
                     <h3 style="color: var(--s);">1. Ingresos Mensuales</h3>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Descripción</th><th>Moneda</th><th>Ingreso Base</th><th>Recibido</th><th>Falta Recibir</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
+                            <thead><tr><th>DescripciÃ³n</th><th>Moneda</th><th>Ingreso Base</th><th>Recibido</th><th>Falta Recibir</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-ingresos"></tbody>
-                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Ingresos:</td><td id="sub-ingresos" style="font-weight:bold; color:var(--s);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Ingresos:</td><td id="sub-ingresos" style="font-weight:bold; color:var(--s);">0.00 â‚¬</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('ingresos')">+ Nuevo Ingreso</button>
@@ -144,9 +144,9 @@
                     <h3 style="color: var(--d);">2. Gastos Mensuales</h3>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Descripción</th><th>Moneda</th><th>Costo Base</th><th>Pagado</th><th>Falta Pagar</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
+                            <thead><tr><th>DescripciÃ³n</th><th>Moneda</th><th>Costo Base</th><th>Pagado</th><th>Falta Pagar</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-gastos"></tbody>
-                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Gastos:</td><td id="sub-gastos" style="font-weight:bold; color:var(--d);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Gastos:</td><td id="sub-gastos" style="font-weight:bold; color:var(--d);">0.00 â‚¬</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('gastos')">+ Nuevo Gasto</button>
@@ -156,28 +156,28 @@
                     <div class="card">
                         <h3>3. Balance del Mes y Meta</h3>
                         <div class="analisis-caja">
-                            <div class="analisis-fila"><span>Total Finanzas (Liq + Cobrar - Potes):</span> <strong id="bal-finanzas">0.00 €</strong></div>
-                            <div class="analisis-fila"><span>Neto del Mes (Ingresos - Gastos):</span> <strong id="bal-neto">0.00 €</strong></div>
-                            <div class="analisis-fila bold-res"><span>Resultado Importante:</span> <strong id="bal-resultado">0.00 €</strong></div>
+                            <div class="analisis-fila"><span>Total Finanzas (Liq + Cobrar - Potes):</span> <strong id="bal-finanzas">0.00 â‚¬</strong></div>
+                            <div class="analisis-fila"><span>Neto del Mes (Ingresos - Gastos):</span> <strong id="bal-neto">0.00 â‚¬</strong></div>
+                            <div class="analisis-fila bold-res"><span>Resultado Importante:</span> <strong id="bal-resultado">0.00 â‚¬</strong></div>
                         </div>
                         
                         <div style="margin-bottom: 15px;">
-                            <label style="font-weight:bold;">Meta a alcanzar este mes (€):</label>
+                            <label style="font-weight:bold;">Meta a alcanzar este mes (â‚¬):</label>
                             <input type="number" id="in-meta" onchange="window.actualizarConfig('metaMensual', this.value)" placeholder="Ej: 30000">
                         </div>
 
                         <div class="analisis-caja" style="text-align: center;">
-                            <p style="margin-bottom: 5px;">Superávit / Déficit (Res. Importante - Meta)</p>
-                            <h2 id="bal-diferencia" style="font-size: 2rem;">0.00 €</h2>
+                            <p style="margin-bottom: 5px;">SuperÃ¡vit / DÃ©ficit (Res. Importante - Meta)</p>
+                            <h2 id="bal-diferencia" style="font-size: 2rem;">0.00 â‚¬</h2>
                             <span id="bal-badge" class="badge">--</span>
                         </div>
                         <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Modificaciones</button>
                     </div>
 
                     <div class="card">
-                        <h3>4. Evolución a Futuro (1 Año)</h3>
+                        <h3>4. EvoluciÃ³n a Futuro (1 AÃ±o)</h3>
                         <div style="margin-bottom: 15px;">
-                            <label style="font-weight:bold;">Valor a ahorrar en cada mes (€):</label>
+                            <label style="font-weight:bold;">Valor a ahorrar en cada mes (â‚¬):</label>
                             <input type="number" id="in-ahorro" onchange="window.actualizarConfig('ahorroMes', this.value)" placeholder="Ej: 645">
                         </div>
                         <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
@@ -190,20 +190,20 @@
                 </div>
 
                 <div class="card" style="border: 2px solid var(--p); background: #f8fafc;">
-                    <h3 style="color: var(--p);">5. Cierre de Mes (Histórico)</h3>
+                    <h3 style="color: var(--p);">5. Cierre de Mes (HistÃ³rico)</h3>
                     <p style="margin-bottom: 15px;">Emite un cierre parcial en cualquier momento (PDF) o ejecuta el cierre final para resetear y archivar el mes.</p>
-                    <input type="text" id="in-nuevo-mes" placeholder="Escribe el nombre del próximo mes (Solo necesario para el cierre final)" style="margin-bottom: 10px;">
+                    <input type="text" id="in-nuevo-mes" placeholder="Escribe el nombre del prÃ³ximo mes (Solo necesario para el cierre final)" style="margin-bottom: 10px;">
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-save-main" style="margin-top: 0; background: var(--p);" onclick="window.generarReportePDF('Parcial')">📄 EMITIR CIERRE PARCIAL (PDF)</button>
+                        <button class="btn btn-save-main" style="margin-top: 0; background: var(--p);" onclick="window.generarReportePDF('Parcial')">ðŸ“„ EMITIR CIERRE PARCIAL (PDF)</button>
                         <button class="btn btn-add" style="margin-top: 0; background: var(--d);" onclick="window.ejecutarCierre()">EJECUTAR CIERRE FINAL Y ARCHIVAR</button>
                     </div>
                 </div>
                 
                 <div class="card" style="margin-top: 20px;">
                     <h3 style="color: var(--s);">Historial de Meses Archivados</h3>
-                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">Aquí puedes ver los meses que ya has cerrado en tu base de datos de Firebase.</p>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">AquÃ­ puedes ver los meses que ya has cerrado en tu base de datos de Firebase.</p>
                     <ul id="lista-historicos" style="list-style: none; padding: 0;">
-                        <li><i>Cargando registros históricos...</i></li>
+                        <li><i>Cargando registros histÃ³ricos...</i></li>
                     </ul>
                 </div>
             </section>
@@ -215,7 +215,7 @@
                         <table>
                             <thead><tr><th>Nombre Reserva</th><th>Moneda</th><th>Saldo Inicial</th><th>Saldo Actual</th><th>Eq. Euros</th><th>Acciones</th></tr></thead>
                             <tbody id="body-potes"></tbody>
-                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-potes-saldo" style="font-weight:bold;">0.00</td><td id="tot-potes-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-potes-saldo" style="font-weight:bold;">0.00</td><td id="tot-potes-eur" style="font-weight:bold; color:var(--a);">0.00 â‚¬</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('potes')">+ Nuevo Pote</button>
@@ -225,15 +225,15 @@
 
             <section id="prestamos" class="tab-content">
                 <div class="card">
-                    <h3>Préstamos por Cobrar</h3>
+                    <h3>PrÃ©stamos por Cobrar</h3>
                     <div class="table-wrap">
                         <table>
                             <thead><tr><th>Deudor</th><th>Moneda</th><th>Monto Inicial</th><th>Cobrado</th><th>Falta Cobrar</th><th>Eq. Euros (Falta)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-prestamos"></tbody>
-                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-pre-cobrado" style="font-weight:bold; color:var(--s);">0.00</td><td id="tot-pre-falta" style="font-weight:bold; color:var(--d);">0.00</td><td id="tot-pre-eur" style="font-weight:bold; color:var(--a);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="3" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-pre-cobrado" style="font-weight:bold; color:var(--s);">0.00</td><td id="tot-pre-falta" style="font-weight:bold; color:var(--d);">0.00</td><td id="tot-pre-eur" style="font-weight:bold; color:var(--a);">0.00 â‚¬</td><td></td></tr></tfoot>
                         </table>
                     </div>
-                    <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo Préstamo</button>
+                    <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo PrÃ©stamo</button>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
                 </div>
             </section>
@@ -241,12 +241,12 @@
             <section id="venezuela" class="tab-content">
                 <div class="card">
                     <h3>Dinero Disponible para Venezuela (Historial y Movimientos)</h3>
-                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">(El saldo se maneja en Euros y se muestra su equivalente en Dólares automáticamente)</p>
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">(El saldo se maneja en Euros y se muestra su equivalente en DÃ³lares automÃ¡ticamente)</p>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Persona / Fondo</th><th>Saldo Inicial (€)</th><th>Saldo Actual (€)</th><th>Equivalente en USD ($)</th><th>Acciones</th></tr></thead>
+                            <thead><tr><th>Persona / Fondo</th><th>Saldo Inicial (â‚¬)</th><th>Saldo Actual (â‚¬)</th><th>Equivalente en USD ($)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-venezuela"></tbody>
-                            <tfoot><tr><td colspan="2" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-vzla-eur" style="font-weight:bold;">0.00 €</td><td id="tot-vzla-usd" style="font-weight:bold; color:var(--s);">$ 0.00</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="2" style="text-align:right; font-weight:bold;">Totales:</td><td id="tot-vzla-eur" style="font-weight:bold;">0.00 â‚¬</td><td id="tot-vzla-usd" style="font-weight:bold; color:var(--s);">$ 0.00</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('venezuela')">+ Nuevo Fondo Vzla (Ej: Danyela, Luis)</button>
@@ -256,12 +256,12 @@
 
             <section id="config" class="tab-content">
                 <div class="card">
-                    <h3>Configuración General</h3>
+                    <h3>ConfiguraciÃ³n General</h3>
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight:bold;">Tasa USD a EUR (1 USD = X EUR):</label>
                         <input type="number" step="0.01" id="in-tasa" onchange="window.actualizarConfig('tasaUsd', this.value)">
                     </div>
-                    <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Configuración</button>
+                    <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar ConfiguraciÃ³n</button>
                 </div>
             </section>
         </main>
@@ -278,13 +278,13 @@
                 <div style="display:flex; gap:10px; margin-bottom: 10px;">
                     <select id="mod-tipo" style="width:30%"></select>
                     <input type="number" id="mod-monto" placeholder="Monto" style="width:30%">
-                    <input type="text" id="mod-obs" placeholder="Observación" style="width:40%">
+                    <input type="text" id="mod-obs" placeholder="ObservaciÃ³n" style="width:40%">
                 </div>
                 <button class="btn btn-add" style="margin-top:0;" onclick="window.agregarMovimiento()">+ Registrar Movimiento</button>
             </div>
 
             <table style="width:100%;">
-                <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Obs.</th><th>Acción</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Obs.</th><th>AcciÃ³n</th></tr></thead>
                 <tbody id="modal-body-movs"></tbody>
             </table>
         </div>
@@ -310,13 +310,13 @@
         };
         let activeModal = { tipoCat: null, index: null };
 
-        // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
+        // --- MANEJO DE NAVEGACIÃ“N Y LOGIN ---
         window.login = () => {
             if(document.getElementById('pass').value === '1234') {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
                 cargarFirebase();
-            } else { alert('Contraseña incorrecta'); }
+            } else { alert('ContraseÃ±a incorrecta'); }
         };
 
         window.showTab = (id) => {
@@ -331,14 +331,14 @@
         const fCur = (val) => Number(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
         const asegurarHistorial = (array) => array ? array.map(item => ({ ...item, movs: item.movs || [] })) : [];
 
-        // --- CRUD BÁSICO ---
+        // --- CRUD BÃSICO ---
         window.agregarItem = (cat) => {
             state[cat].push({ nombre: '', moneda: 'EUR', base: 0, movs: [] });
             renderTodo();
         };
 
         window.eliminarItem = (cat, index) => {
-            if(confirm('¿Eliminar registro de forma permanente?')) {
+            if(confirm('Â¿Eliminar registro de forma permanente?')) {
                 state[cat].splice(index, 1);
                 renderTodo();
             }
@@ -370,7 +370,7 @@
             } else if (cat === 'gastos') {
                 sel.innerHTML = '<option value="Pago">Abonar al Gasto (+)</option><option value="Ajuste">Ajustar Costo (+)</option>';
             } else if (cat === 'prestamos') {
-                sel.innerHTML = '<option value="Abono">Me Abonaron (+)</option><option value="Incremento">Presté Más (+)</option>';
+                sel.innerHTML = '<option value="Abono">Me Abonaron (+)</option><option value="Incremento">PrestÃ© MÃ¡s (+)</option>';
             }
             document.getElementById('modal-historial').style.display = 'flex';
             renderModalMovs();
@@ -380,7 +380,7 @@
 
         window.agregarMovimiento = () => {
             const m = parseFloat(document.getElementById('mod-monto').value);
-            if(!m || m <= 0) return alert('Ingresa un monto válido');
+            if(!m || m <= 0) return alert('Ingresa un monto vÃ¡lido');
             
             state[activeModal.tipoCat][activeModal.index].movs.push({
                 fecha: new Date().toLocaleDateString(),
@@ -404,7 +404,7 @@
             } else {
                 state[activeModal.tipoCat][activeModal.index].movs[movIndex][campo] = valor;
             }
-            renderTodo(); // Recalcula los saldos detrás del modal
+            renderTodo(); // Recalcula los saldos detrÃ¡s del modal
         };
 
         function renderModalMovs() {
@@ -424,7 +424,7 @@
             });
         }
 
-        // --- MOTOR DE CÁLCULO CONTABLE ---
+        // --- MOTOR DE CÃLCULO CONTABLE ---
         function calcularSaldo(item, cat) {
             let saldo = item.base;
             let ejecutado = 0; // Recibido(Ingresos) o Pagado(Gastos/Prestamos)
@@ -479,8 +479,8 @@
                     
                     if(type === 'saldo') {
                         let eqEur = toEur(c.saldo, item.moneda);
-                        if(cat === 'cuentas') { eqLiquidez += eqEur; totCuentasSaldo += c.saldo; htmlLiq += `<li><span>${item.nombre||'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
-                        if(cat === 'potes') { eqPotes += eqEur; totPotesSaldo += c.saldo; htmlComp += `<li><span>Pote: ${item.nombre||'Reserva'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
+                        if(cat === 'cuentas') { eqLiquidez += eqEur; totCuentasSaldo += c.saldo; htmlLiq += `<li><span>${item.nombre||'Cuenta'}</span> <strong>${fCur(eqEur)} â‚¬</strong></li>`; }
+                        if(cat === 'potes') { eqPotes += eqEur; totPotesSaldo += c.saldo; htmlComp += `<li><span>Pote: ${item.nombre||'Reserva'}</span> <strong>${fCur(eqEur)} â‚¬</strong></li>`; }
 
                         tbody.innerHTML += `
                             <tr>
@@ -488,7 +488,7 @@
                                 <td>${selMoneda}</td>
                                 <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
                                 <td><strong>${fCur(c.saldo)}</strong></td>
-                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} â‚¬</td>
                                 <td>
                                     <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
@@ -503,17 +503,17 @@
                         if(cat === 'gastos') {
                             sumBaseGastos += eqEurBase;
                             eqGastosPendientes += eqEurResta;
-                            if(eqEurResta > 0) htmlComp += `<li><span style="color:var(--d)">Falta Pagar: ${item.nombre||'Gasto'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
+                            if(eqEurResta > 0) htmlComp += `<li><span style="color:var(--d)">Falta Pagar: ${item.nombre||'Gasto'}</span> <strong>${fCur(eqEurResta)} â‚¬</strong></li>`;
                         }
 
                         tbody.innerHTML += `
                             <tr>
-                                <td><input type="text" value="${item.nombre}" placeholder="Descripción" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td><input type="text" value="${item.nombre}" placeholder="DescripciÃ³n" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
                                 <td>${selMoneda}</td>
                                 <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
                                 <td><span style="color:${cat==='ingresos'?'var(--s)':'var(--s)'};">${fCur(c.ejecutado)}</span></td>
                                 <td style="color:${cat==='ingresos'?'var(--w)':'var(--d)'}; font-weight:bold;">${fCur(c.resta)}</td>
-                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurBase)} €</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurBase)} â‚¬</td>
                                 <td>
                                     <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
@@ -524,7 +524,7 @@
                         eqPorCobrar += eqEurResta;
                         totPreCobrado += c.ejecutado;
                         totPreFalta += c.resta;
-                        if(eqEurResta > 0) htmlCobrar += `<li><span>${item.nombre||'Deudor'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
+                        if(eqEurResta > 0) htmlCobrar += `<li><span>${item.nombre||'Deudor'}</span> <strong>${fCur(eqEurResta)} â‚¬</strong></li>`;
 
                         tbody.innerHTML += `
                             <tr>
@@ -533,7 +533,7 @@
                                 <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
                                 <td><span style="color:var(--s);">${fCur(c.ejecutado)}</span></td>
                                 <td style="color:var(--d); font-weight:bold;">${fCur(c.resta)}</td>
-                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurResta)} €</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurResta)} â‚¬</td>
                                 <td>
                                     <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
@@ -549,7 +549,7 @@
             renderTable('gastos', 'body-gastos', 'flujo');
             renderTable('prestamos', 'body-prestamos', 'prestamo');
 
-            // RENDER ESPECIAL PARA VENEZUELA (Euros a Dólares)
+            // RENDER ESPECIAL PARA VENEZUELA (Euros a DÃ³lares)
             const tbodyVzla = document.getElementById('body-venezuela');
             if (tbodyVzla) {
                 tbodyVzla.innerHTML = '';
@@ -562,7 +562,7 @@
                         <tr>
                             <td><input type="text" value="${item.nombre}" placeholder="Ej: Danyela" onchange="window.actualizarCampo('venezuela', ${i}, 'nombre', this.value)"></td>
                             <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('venezuela', ${i}, 'base', this.value)"></td>
-                            <td><strong>${fCur(c.saldo)} €</strong></td>
+                            <td><strong>${fCur(c.saldo)} â‚¬</strong></td>
                             <td style="color:var(--s); font-weight:bold;">$ ${fCur(eqUsd)}</td>
                             <td>
                                 <button class="btn btn-action" onclick="window.abrirModal('venezuela', ${i})">Historial</button>
@@ -575,23 +575,23 @@
             // Actualizar Totales Tablas
             if(document.getElementById('tot-cuentas-saldo')) {
                 document.getElementById('tot-cuentas-saldo').innerText = fCur(totCuentasSaldo);
-                document.getElementById('tot-cuentas-eur').innerText = fCur(eqLiquidez) + ' €';
+                document.getElementById('tot-cuentas-eur').innerText = fCur(eqLiquidez) + ' â‚¬';
             }
             if(document.getElementById('tot-potes-saldo')) {
                 document.getElementById('tot-potes-saldo').innerText = fCur(totPotesSaldo);
-                document.getElementById('tot-potes-eur').innerText = fCur(eqPotes) + ' €';
+                document.getElementById('tot-potes-eur').innerText = fCur(eqPotes) + ' â‚¬';
             }
             if(document.getElementById('tot-pre-cobrado')) {
                 document.getElementById('tot-pre-cobrado').innerText = fCur(totPreCobrado);
                 document.getElementById('tot-pre-falta').innerText = fCur(totPreFalta);
-                document.getElementById('tot-pre-eur').innerText = fCur(eqPorCobrar) + ' €';
+                document.getElementById('tot-pre-eur').innerText = fCur(eqPorCobrar) + ' â‚¬';
             }
             if(document.getElementById('tot-vzla-eur')) {
-                document.getElementById('tot-vzla-eur').innerText = fCur(totVzlaEur) + ' €';
+                document.getElementById('tot-vzla-eur').innerText = fCur(totVzlaEur) + ' â‚¬';
                 document.getElementById('tot-vzla-usd').innerText = '$ ' + fCur(totVzlaUsd);
             }
 
-            // --- LÓGICA DE BALANCE AVANZADO ---
+            // --- LÃ“GICA DE BALANCE AVANZADO ---
             const eqComprometidoTotal = eqPotes + eqGastosPendientes;
             const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
             const netoMensual = sumBaseIngresos - sumBaseGastos;
@@ -599,39 +599,39 @@
             const diferencia = resultadoImportante - state.config.metaMensual;
 
             // Actualizar textos Dashboard (EL TODO)
-            document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' €';
-            document.getElementById('dash-comp').innerText = fCur(eqComprometidoTotal) + ' €';
-            document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
+            document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' â‚¬';
+            document.getElementById('dash-comp').innerText = fCur(eqComprometidoTotal) + ' â‚¬';
+            document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' â‚¬';
             document.getElementById('lista-real').innerHTML = `
-                <li><span>Liq - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez - eqComprometidoTotal)} €</strong></li>
-                <li><span>Liq + Cobrar - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqComprometidoTotal)} €</strong></li>
-                <li><span>Liq - Gastos:</span> <strong>${fCur(eqLiquidez - eqGastosPendientes)} €</strong></li>
-                <li><span>Liq + Cobrar - Gastos:</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqGastosPendientes)} €</strong></li>
+                <li><span>Liq - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez - eqComprometidoTotal)} â‚¬</strong></li>
+                <li><span>Liq + Cobrar - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqComprometidoTotal)} â‚¬</strong></li>
+                <li><span>Liq - Gastos:</span> <strong>${fCur(eqLiquidez - eqGastosPendientes)} â‚¬</strong></li>
+                <li><span>Liq + Cobrar - Gastos:</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqGastosPendientes)} â‚¬</strong></li>
             `;
             
             document.getElementById('lista-liq').innerHTML = htmlLiq || "<li>Sin cuentas</li>";
-            document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al día</li>";
+            document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al dÃ­a</li>";
             document.getElementById('lista-cobrar').innerHTML = htmlCobrar || "<li>Nadie debe</li>";
 
             // Actualizar textos Compromisos Mensuales
-            document.getElementById('sub-ingresos').innerText = fCur(sumBaseIngresos) + ' €';
-            document.getElementById('sub-gastos').innerText = fCur(sumBaseGastos) + ' €';
+            document.getElementById('sub-ingresos').innerText = fCur(sumBaseIngresos) + ' â‚¬';
+            document.getElementById('sub-gastos').innerText = fCur(sumBaseGastos) + ' â‚¬';
             
-            document.getElementById('bal-finanzas').innerText = fCur(totalFinanzas) + ' €';
-            document.getElementById('bal-neto').innerText = fCur(netoMensual) + ' €';
-            document.getElementById('bal-resultado').innerText = fCur(resultadoImportante) + ' €';
+            document.getElementById('bal-finanzas').innerText = fCur(totalFinanzas) + ' â‚¬';
+            document.getElementById('bal-neto').innerText = fCur(netoMensual) + ' â‚¬';
+            document.getElementById('bal-resultado').innerText = fCur(resultadoImportante) + ' â‚¬';
             
             const divDiferencia = document.getElementById('bal-diferencia');
             const badgeDiferencia = document.getElementById('bal-badge');
-            divDiferencia.innerText = fCur(diferencia) + ' €';
+            divDiferencia.innerText = fCur(diferencia) + ' â‚¬';
             
             if(diferencia > 0) {
                 divDiferencia.style.color = "var(--s)";
-                badgeDiferencia.innerText = "SUPERÁVIT";
+                badgeDiferencia.innerText = "SUPERÃVIT";
                 badgeDiferencia.style.background = "var(--s)"; badgeDiferencia.style.color = "white";
             } else if (diferencia < 0) {
                 divDiferencia.style.color = "var(--d)";
-                badgeDiferencia.innerText = "DÉFICIT";
+                badgeDiferencia.innerText = "DÃ‰FICIT";
                 badgeDiferencia.style.background = "var(--d)"; badgeDiferencia.style.color = "white";
             } else {
                 divDiferencia.style.color = "var(--p)";
@@ -639,17 +639,17 @@
                 badgeDiferencia.style.background = "#e2e8f0"; badgeDiferencia.style.color = "var(--p)";
             }
 
-            // Render Proyección 1 Año
+            // Render ProyecciÃ³n 1 AÃ±o
             const tbodyProy = document.getElementById('body-proyeccion');
             tbodyProy.innerHTML = '';
             let capProy = resultadoImportante;
             for(let i=1; i<=12; i++) {
                 capProy += state.config.ahorroMes;
-                tbodyProy.innerHTML += `<tr><td>Mes +${i}</td><td style="font-weight:bold; color:var(--a);">${fCur(capProy)} €</td></tr>`;
+                tbodyProy.innerHTML += `<tr><td>Mes +${i}</td><td style="font-weight:bold; color:var(--a);">${fCur(capProy)} â‚¬</td></tr>`;
             }
         }
 
-        // --- MOSTRAR LISTA DE HISTÓRICOS ---
+        // --- MOSTRAR LISTA DE HISTÃ“RICOS ---
         window.cargarHistoricos = () => {
             onValue(ref(db, 'finanzas_master/historico'), (snapshot) => {
                 const lista = document.getElementById('lista-historicos');
@@ -657,27 +657,20 @@
                 const data = snapshot.val();
                 lista.innerHTML = '';
                 if(data) {
-                    Object.keys(data).reverse().forEach(mesKey => {
-                        const record = data[mesKey];
-                        const tipoCierre = record.tipoCierre || (mesKey.includes('Parcial') ? 'Parcial' : 'Final');
-                        const colorBadge = tipoCierre === 'Parcial' ? 'var(--a)' : 'var(--d)';
-                        
-                        let btnPdf = record.pdfBase64 ? `<a href="${record.pdfBase64}" download="Reporte_${mesKey}.pdf" class="btn btn-save-main" style="margin:0; padding: 5px 10px; font-size:0.8rem; text-decoration:none;">📄 Descargar PDF</a>` : '';
+                    Object.keys(data).forEach(mesKey => {
+                        let btnPdf = data[mesKey].pdfArchivado ? `<a href="${data[mesKey].pdfArchivado}" download="Respaldo_${mesKey}.pdf" style="text-decoration:none; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:var(--a); color:white; margin-right:5px;">ðŸ“„ Ver PDF</a>` : '';
                         
                         lista.innerHTML += `
-                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; gap:10px; flex-wrap: wrap;">
+                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${mesKey}</strong>
                             <div>
-                                <strong>${mesKey}</strong>
-                                <span class="badge" style="background: ${colorBadge}; color: white; margin-left: 5px;">${tipoCierre}</span>
-                            </div>
-                            <div style="display:flex; gap:10px; align-items:center;">
-                                <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
                                 ${btnPdf}
+                                <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
                             </div>
                         </li>`;
                     });
                 } else {
-                    lista.innerHTML = '<li><i>Aún no hay meses archivados.</i></li>';
+                    lista.innerHTML = '<li><i>AÃºn no hay meses archivados.</i></li>';
                 }
             });
         };
@@ -692,7 +685,7 @@
             const addSection = (title, items) => {
                 html += `<h3 style="margin-top:20px;">${title}</h3><table border="1" width="100%" style="border-collapse:collapse; margin-bottom: 15px; font-size:12px;"><tr><th style="padding:5px; background:#f4f6f8;">Nombre</th><th style="padding:5px; background:#f4f6f8;">Monto Base</th><th style="padding:5px; background:#f4f6f8;">Historial (Movimientos)</th></tr>`;
                 items.forEach(item => {
-                    let movsHtml = item.movs.map(m => `• ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>');
+                    let movsHtml = item.movs.map(m => `â€¢ ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>');
                     html += `<tr><td style="padding:5px;">${item.nombre}</td><td style="padding:5px;">${item.base} ${item.moneda}</td><td style="padding:5px;">${movsHtml || 'Sin movimientos registrados'}</td></tr>`;
                 });
                 html += `</table>`;
@@ -702,7 +695,7 @@
             addSection("Ingresos", state.ingresos);
             addSection("Gastos", state.gastos);
             addSection("Potes y Reservas", state.potes);
-            addSection("Préstamos Otorgados", state.prestamos);
+            addSection("PrÃ©stamos Otorgados", state.prestamos);
             addSection("Fondos Venezuela", state.venezuela);
             
             const opt = {
@@ -714,7 +707,7 @@
             };
             
             // Envolvemos el string HTML en un div con los estilos necesarios y lo pasamos directo.
-            // Esto soluciona de raíz el PDF en blanco causado por enviar un elemento DOM sin adjuntar.
+            // Esto soluciona de raÃ­z el PDF en blanco causado por enviar un elemento DOM sin adjuntar.
             const contenidoFinal = `<div style="padding: 20px; font-family: sans-serif;">${html}</div>`;
             
             if(tipo === 'Parcial') {
@@ -738,7 +731,7 @@
             const nuevoMes = document.getElementById('in-nuevo-mes').value;
             if(!nuevoMes) return alert("Debes colocar el nombre del nuevo mes para continuar con el cierre final.");
 
-            if(confirm(`¿Archivar los datos como histórico de ${state.config.mes} y comenzar ${nuevoMes}? Se descargará un PDF y los pagos/ingresos volverán a cero.`)) {
+            if(confirm(`Â¿Archivar los datos como histÃ³rico de ${state.config.mes} y comenzar ${nuevoMes}? Se descargarÃ¡ un PDF y los pagos/ingresos volverÃ¡n a cero.`)) {
                 
                 window.generarReportePDF('Final');
 
@@ -752,7 +745,7 @@
                     
                     set(ref(db, 'finanzas_master/estado'), state).then(() => {
                         document.getElementById('in-nuevo-mes').value = '';
-                        alert(`¡Mes archivado! Iniciando ciclo de ${nuevoMes}.`);
+                        alert(`Â¡Mes archivado! Iniciando ciclo de ${nuevoMes}.`);
                         renderTodo();
                     });
                 }, 1500);
@@ -778,7 +771,7 @@
             generarSec("INGRESOS", "ingresos", "flujo");
             generarSec("GASTOS", "gastos", "flujo");
             generarSec("POTES", "potes", "saldo");
-            generarSec("PRÉSTAMOS", "prestamos", "prestamo");
+            generarSec("PRÃ‰STAMOS", "prestamos", "prestamo");
 
             const a = document.createElement("a");
             a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
@@ -786,7 +779,7 @@
             a.click();
         };
 
-        // --- SINCRONIZACIÓN FIREBASE ---
+        // --- SINCRONIZACIÃ“N FIREBASE ---
         window.guardarFirebase = () => {
             set(ref(db, 'finanzas_master/estado'), state).then(() => alert('Datos guardados exitosamente.'));
             renderTodo();
