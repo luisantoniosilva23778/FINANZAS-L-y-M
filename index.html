@@ -215,4 +215,295 @@
             </table>
         </div>
     </div>
-    
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
+            authDomain: "finanzas-m-y-l.firebaseapp.com",
+            databaseURL: "https://finanzas-m-y-l-default-rtdb.firebaseio.com",
+            projectId: "finanzas-m-y-l",
+            storageBucket: "finanzas-m-y-l.firebasestorage.app",
+            appId: "1:590213560036:web:c03a20e0e207b3f60fdef1"
+        });
+        const db = getDatabase(app);
+
+        // Estado local
+        let state = {
+            config: { mes: "Marzo 2026", tasaUsd: 0.85 },
+            cuentas: [], gastos: [], potes: [], prestamos: []
+        };
+        let activeModal = { tipoCat: null, index: null };
+
+        window.login = () => {
+            if(document.getElementById('pass').value === '1234') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                cargarFirebase();
+            } else { alert('Contraseña incorrecta'); }
+        };
+
+        window.showTab = (id) => {
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            renderTodo();
+        };
+
+        const toEur = (monto, moneda) => moneda === 'USD' ? monto * state.config.tasaUsd : monto;
+        const fCur = (val) => Number(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+        // Asegurador de arrays (Evita el bug de Firebase)
+        const asegurarHistorial = (array) => {
+            if(!array) return [];
+            return array.map(item => ({ ...item, movs: item.movs || [] }));
+        };
+
+        window.agregarItem = (cat) => {
+            state[cat].push({ nombre: '', moneda: 'EUR', base: 0, movs: [] });
+            renderTodo();
+        };
+
+        window.eliminarItem = (cat, index) => {
+            if(confirm('¿Eliminar registro?')) {
+                state[cat].splice(index, 1);
+                renderTodo();
+            }
+        };
+
+        window.actualizarCampo = (cat, index, campo, valor) => {
+            if(campo === 'base') state[cat][index][campo] = parseFloat(valor) || 0;
+            else state[cat][index][campo] = valor;
+            renderTodo(); 
+        };
+
+        window.actualizarConfig = (campo, valor) => {
+            if(campo === 'tasaUsd') state.config[campo] = parseFloat(valor) || 0.85;
+            else state.config[campo] = valor;
+            renderTodo();
+        };
+
+        // Modal
+        window.abrirModal = (cat, index) => {
+            activeModal = { tipoCat: cat, index: index };
+            const item = state[cat][index];
+            document.getElementById('modal-title').innerText = `Historial: ${item.nombre}`;
+            
+            const sel = document.getElementById('mod-tipo');
+            if(cat === 'cuentas' || cat === 'potes') {
+                sel.innerHTML = '<option value="Ingreso">Ingreso (+)</option><option value="Retiro">Retiro (-)</option>';
+            } else if (cat === 'gastos') {
+                sel.innerHTML = '<option value="Pago">Abonar al Pago (+)</option><option value="Ajuste">Ajustar Costo (+)</option>';
+            } else if (cat === 'prestamos') {
+                sel.innerHTML = '<option value="Abono">Me Abonaron (+)</option><option value="Incremento">Presté Más (+)</option>';
+            }
+            document.getElementById('modal-historial').style.display = 'flex';
+            renderModalMovs();
+        };
+
+        window.cerrarModal = () => {
+            document.getElementById('modal-historial').style.display = 'none';
+            renderTodo();
+        };
+
+        window.agregarMovimiento = () => {
+            const m = parseFloat(document.getElementById('mod-monto').value);
+            if(!m || m <= 0) return alert('Ingresa un monto válido');
+            
+            state[activeModal.tipoCat][activeModal.index].movs.push({
+                fecha: new Date().toLocaleDateString(),
+                tipo: document.getElementById('mod-tipo').value,
+                monto: m,
+                obs: document.getElementById('mod-obs').value || '-'
+            });
+            document.getElementById('mod-monto').value = '';
+            document.getElementById('mod-obs').value = '';
+            renderModalMovs();
+        };
+
+        window.eliminarMov = (movIndex) => {
+            state[activeModal.tipoCat][activeModal.index].movs.splice(movIndex, 1);
+            renderModalMovs();
+        };
+
+        function renderModalMovs() {
+            const item = state[activeModal.tipoCat][activeModal.index];
+            const tbody = document.getElementById('modal-body-movs');
+            tbody.innerHTML = '';
+            item.movs.forEach((m, i) => {
+                let isSubtract = (m.tipo === 'Retiro' || m.tipo === 'Abono');
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${m.fecha}</td>
+                        <td><span class="badge">${m.tipo}</span></td>
+                        <td style="color:${isSubtract ? 'var(--d)' : 'var(--s)'}; font-weight:bold;">${m.monto}</td>
+                        <td>${m.obs}</td>
+                        <td><button class="btn btn-del" onclick="window.eliminarMov(${i})">X</button></td>
+                    </tr>`;
+            });
+        }
+
+        // Cálculos
+        function calcularSaldo(item, cat) {
+            let saldo = item.base;
+            let sumEgresos = 0; 
+            item.movs.forEach(m => {
+                if(cat === 'cuentas' || cat === 'potes') {
+                    if(m.tipo === 'Ingreso') saldo += m.monto;
+                    if(m.tipo === 'Retiro') saldo -= m.monto;
+                } else if(cat === 'gastos') {
+                    if(m.tipo === 'Ajuste') saldo += m.monto; 
+                    if(m.tipo === 'Pago') sumEgresos += m.monto;
+                } else if(cat === 'prestamos') {
+                    if(m.tipo === 'Incremento') saldo += m.monto; 
+                    if(m.tipo === 'Abono') sumEgresos += m.monto;
+                }
+            });
+            if(cat === 'gastos' || cat === 'prestamos') return { total: saldo, pagado: sumEgresos, resta: Math.max(0, saldo - sumEgresos) };
+            return { saldo: saldo };
+        }
+
+        function renderTodo() {
+            document.getElementById('header-mes').innerText = state.config.mes;
+            document.getElementById('in-tasa').value = state.config.tasaUsd;
+            document.getElementById('in-mes').value = state.config.mes;
+
+            let eqLiquidez = 0, eqComprometido = 0, eqPorCobrar = 0;
+            
+            // Listas para el Dashboard
+            let htmlLiq = "", htmlComp = "", htmlCobrar = "";
+
+            const renderTable = (cat, tbodyId, type) => {
+                const tbody = document.getElementById(tbodyId);
+                tbody.innerHTML = '';
+                
+                state[cat].forEach((item, i) => {
+                    const selMoneda = `
+                        <select onchange="window.actualizarCampo('${cat}', ${i}, 'moneda', this.value)">
+                            <option value="EUR" ${item.moneda==='EUR'?'selected':''}>EUR</option>
+                            <option value="USD" ${item.moneda==='USD'?'selected':''}>USD</option>
+                        </select>`;
+                    
+                    const c = calcularSaldo(item, cat);
+                    let eqEur = 0;
+
+                    if(type === 'saldo') {
+                        eqEur = toEur(c.saldo, item.moneda);
+                        if(cat === 'cuentas') {
+                            eqLiquidez += eqEur;
+                            htmlLiq += `<li><span>${item.nombre || 'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
+                        }
+                        if(cat === 'potes') {
+                            eqComprometido += eqEur;
+                            htmlComp += `<li><span>${item.nombre || 'Pote'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><input type="text" value="${item.nombre}" placeholder="Nombre" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td>${selMoneda}</td>
+                                <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
+                                <td><strong>${fCur(c.saldo)}</strong></td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td>
+                                    <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
+                                    <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
+                                </td>
+                            </tr>`;
+                    } else { 
+                        eqEur = toEur(c.resta, item.moneda);
+                        if(cat === 'gastos') {
+                            eqComprometido += eqEur;
+                            if(eqEur > 0) htmlComp += `<li><span style="color:var(--d)">Falta: ${item.nombre || 'Gasto'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
+                        }
+                        if(cat === 'prestamos') {
+                            eqPorCobrar += eqEur;
+                            if(eqEur > 0) htmlCobrar += `<li><span>${item.nombre || 'Deudor'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><input type="text" value="${item.nombre}" placeholder="Descripción" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td>${selMoneda}</td>
+                                <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
+                                <td><span style="color:var(--s);">${fCur(c.pagado)}</span></td>
+                                <td style="color:var(--d); font-weight:bold;">${fCur(c.resta)}</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td>
+                                    <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
+                                    <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
+                                </td>
+                            </tr>`;
+                    }
+                });
+            };
+
+            renderTable('cuentas', 'body-cuentas', 'saldo');
+            renderTable('potes', 'body-potes', 'saldo');
+            renderTable('gastos', 'body-gastos', 'deuda');
+            renderTable('prestamos', 'body-prestamos', 'deuda');
+
+            // Actualizar EL TODO (Stats + Listas)
+            document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' €';
+            document.getElementById('lista-liq').innerHTML = htmlLiq || "<li>Sin cuentas</li>";
+            
+            document.getElementById('dash-comp').innerText = fCur(eqComprometido) + ' €';
+            document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al día</li>";
+            
+            document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
+            document.getElementById('lista-cobrar').innerHTML = htmlCobrar || "<li>Nadie debe</li>";
+            
+            document.getElementById('dash-real').innerText = fCur(eqLiquidez - eqComprometido) + ' €';
+        }
+
+        // --- EXPORTAR A EXCEL (CSV) ---
+        window.exportarExcel = () => {
+            let csv = "\uFEFF"; // Para formato UTF-8 Excel
+            csv += `REPORTE FINANCIERO - ${state.config.mes}\nTasa USD a EUR: ${state.config.tasaUsd}\n\n`;
+
+            const generarSeccion = (titulo, cat, type) => {
+                csv += `${titulo}\nNombre,Moneda,Base,Total / Resta,Eq. Euros\n`;
+                state[cat].forEach(item => {
+                    const c = calcularSaldo(item, cat);
+                    let val = type === 'saldo' ? c.saldo : c.resta;
+                    let eq = toEur(val, item.moneda);
+                    csv += `"${item.nombre}","${item.moneda}","${item.base}","${val}","${eq}"\n`;
+                });
+                csv += "\n";
+            };
+
+            generarSeccion("CUENTAS", "cuentas", "saldo");
+            generarSeccion("POTES Y RESERVAS", "potes", "saldo");
+            generarSeccion("GASTOS PENDIENTES", "gastos", "deuda");
+            generarSeccion("PRÉSTAMOS (POR COBRAR)", "prestamos", "deuda");
+
+            const a = document.createElement("a");
+            a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            a.download = `Finanzas_${state.config.mes.replace(" ", "_")}.csv`;
+            a.click();
+        };
+
+        // Sincronización
+        window.guardarFirebase = () => {
+            set(ref(db, 'finanzas_master/estado'), state).then(() => alert('Datos guardados exitosamente.'));
+            renderTodo();
+        };
+
+        function cargarFirebase() {
+            onValue(ref(db, 'finanzas_master/estado'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85 };
+                    state.cuentas = asegurarHistorial(data.cuentas);
+                    state.gastos = asegurarHistorial(data.gastos);
+                    state.potes = asegurarHistorial(data.potes);
+                    state.prestamos = asegurarHistorial(data.prestamos);
+                    renderTodo();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
