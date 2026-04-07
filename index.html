@@ -58,6 +58,7 @@
         
         #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--p); position: fixed; inset: 0; z-index: 2000; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -84,6 +85,7 @@
             <button class="tab-btn" onclick="window.showTab('compromisos')">COMPROMISOS MENS.</button>
             <button class="tab-btn" onclick="window.showTab('potes')">POTES</button>
             <button class="tab-btn" onclick="window.showTab('prestamos')">PRÉSTAMOS</button>
+            <button class="tab-btn" onclick="window.showTab('venezuela')">VENEZUELA</button>
             <button class="tab-btn" onclick="window.showTab('config')">CONFIG</button>
         </nav>
 
@@ -187,9 +189,12 @@
 
                 <div class="card" style="border: 2px solid var(--p); background: #f8fafc;">
                     <h3 style="color: var(--p);">5. Cierre de Mes (Histórico)</h3>
-                    <p style="margin-bottom: 15px;">Al cerrar, se guardará el estado actual en el histórico. Los montos base (Ingresos y Gastos) se mantendrán, pero los valores "Recibido" y "Pagado" volverán a cero para iniciar el nuevo mes.</p>
-                    <input type="text" id="in-nuevo-mes" placeholder="Escribe el nombre del próximo mes (Ej: Abril 2026)" style="margin-bottom: 10px;">
-                    <button class="btn btn-add" onclick="window.ejecutarCierre()">EJECUTAR CIERRE Y ARCHIVAR</button>
+                    <p style="margin-bottom: 15px;">Emite un cierre parcial en cualquier momento (PDF) o ejecuta el cierre final para resetear y archivar el mes.</p>
+                    <input type="text" id="in-nuevo-mes" placeholder="Escribe el nombre del próximo mes (Solo necesario para el cierre final)" style="margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-save-main" style="margin-top: 0; background: var(--p);" onclick="window.generarReportePDF('Parcial')">📄 EMITIR CIERRE PARCIAL (PDF)</button>
+                        <button class="btn btn-add" style="margin-top: 0; background: var(--d);" onclick="window.ejecutarCierre()">EJECUTAR CIERRE FINAL Y ARCHIVAR</button>
+                    </div>
                 </div>
             </section>
 
@@ -217,6 +222,28 @@
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo Préstamo</button>
+                    <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
+                </div>
+            </section>
+
+            <section id="venezuela" class="tab-content">
+                <div class="card">
+                    <h3>Dinero Disponible para Venezuela</h3>
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">(Ingresa el saldo en Euros, se calculará su equivalente en USD automáticamente)</p>
+                    <div class="grid-2">
+                        <div class="analisis-caja">
+                            <h4 style="color: var(--p); margin-bottom: 10px;">DANYELA</h4>
+                            <label>Disponible en Euros (€):</label>
+                            <input type="number" id="ven-dan-eur" onchange="window.actualizarConfig('venDanEur', this.value)" style="margin-bottom: 10px;">
+                            <p>Equivalente en Dólares ($): <strong id="ven-dan-usd" style="color: var(--s); font-size: 1.2rem;">0.00</strong></p>
+                        </div>
+                        <div class="analisis-caja">
+                            <h4 style="color: var(--p); margin-bottom: 10px;">LUIS</h4>
+                            <label>Disponible en Euros (€):</label>
+                            <input type="number" id="ven-luis-eur" onchange="window.actualizarConfig('venLuisEur', this.value)" style="margin-bottom: 10px;">
+                            <p>Equivalente en Dólares ($): <strong id="ven-luis-usd" style="color: var(--s); font-size: 1.2rem;">0.00</strong></p>
+                        </div>
+                    </div>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
                 </div>
             </section>
@@ -272,7 +299,7 @@
 
         // ESTADO LOCAL (Data Model)
         let state = {
-            config: { mes: "Marzo 2026", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 },
+            config: { mes: "Marzo 2026", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0, venDanEur: 0, venLuisEur: 0 },
             cuentas: [], ingresos: [], gastos: [], potes: [], prestamos: []
         };
         let activeModal = { tipoCat: null, index: null };
@@ -365,6 +392,15 @@
             renderModalMovs();
         };
 
+        window.editarMov = (movIndex, campo, valor) => {
+            if(campo === 'monto') {
+                state[activeModal.tipoCat][activeModal.index].movs[movIndex][campo] = parseFloat(valor) || 0;
+            } else {
+                state[activeModal.tipoCat][activeModal.index].movs[movIndex][campo] = valor;
+            }
+            renderTodo(); // Recalcula los saldos detrás del modal
+        };
+
         function renderModalMovs() {
             const item = state[activeModal.tipoCat][activeModal.index];
             const tbody = document.getElementById('modal-body-movs');
@@ -373,10 +409,10 @@
                 let isSub = (m.tipo === 'Retiro' || m.tipo === 'Pago' || m.tipo === 'Abono');
                 tbody.innerHTML += `
                     <tr>
-                        <td>${m.fecha}</td>
+                        <td><input type="text" value="${m.fecha}" onchange="window.editarMov(${i}, 'fecha', this.value)" style="width: 85px; padding: 4px;"></td>
                         <td><span class="badge">${m.tipo}</span></td>
-                        <td style="color:${isSub ? 'var(--d)' : 'var(--s)'}; font-weight:bold;">${m.monto}</td>
-                        <td>${m.obs}</td>
+                        <td><input type="number" value="${m.monto}" onchange="window.editarMov(${i}, 'monto', this.value)" style="width: 80px; padding: 4px; color:${isSub ? 'var(--d)' : 'var(--s)'}; font-weight:bold;"></td>
+                        <td><input type="text" value="${m.obs}" onchange="window.editarMov(${i}, 'obs', this.value)" style="padding: 4px;"></td>
                         <td><button class="btn btn-del" onclick="window.eliminarMov(${i})">X</button></td>
                     </tr>`;
             });
@@ -415,6 +451,14 @@
             document.getElementById('in-tasa').value = state.config.tasaUsd;
             document.getElementById('in-meta').value = state.config.metaMensual;
             document.getElementById('in-ahorro').value = state.config.ahorroMes;
+            
+            document.getElementById('ven-dan-eur').value = state.config.venDanEur || 0;
+            document.getElementById('ven-luis-eur').value = state.config.venLuisEur || 0;
+            
+            // Calculo a USD: EUR / Tasa (ej. si 1 USD = 0.85 EUR, 100 EUR = 117.64 USD)
+            let tasa = state.config.tasaUsd || 1;
+            document.getElementById('ven-dan-usd').innerText = fCur((state.config.venDanEur || 0) / tasa);
+            document.getElementById('ven-luis-usd').innerText = fCur((state.config.venLuisEur || 0) / tasa);
 
             let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0;
             let sumBaseIngresos = 0, sumBaseGastos = 0;
@@ -508,7 +552,7 @@
             const eqComprometidoTotal = eqPotes + eqGastosPendientes;
             const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
             const netoMensual = sumBaseIngresos - sumBaseGastos;
-            const resultadoImportante = totalFinanzas - netoMensual;
+            const resultadoImportante = totalFinanzas + netoMensual;
             const diferencia = resultadoImportante - state.config.metaMensual;
 
             // Actualizar textos Dashboard (EL TODO)
@@ -558,28 +602,67 @@
         }
 
         // --- CIERRE DE MES Y EXPORTAR ---
+        window.generarReportePDF = (tipo) => {
+            const element = document.createElement('div');
+            element.style.padding = '20px';
+            element.style.fontFamily = 'sans-serif';
+            let html = `<h2 style="color:#1e293b;">Reporte de Balance ${tipo} - ${state.config.mes}</h2><p>Emitido el: ${new Date().toLocaleDateString()}</p><hr>`;
+            
+            const addSection = (title, items) => {
+                html += `<h3 style="margin-top:20px;">${title}</h3><table border="1" width="100%" style="border-collapse:collapse; margin-bottom: 15px; font-size:12px;"><tr><th style="padding:5px; background:#f4f6f8;">Nombre</th><th style="padding:5px; background:#f4f6f8;">Monto Base</th><th style="padding:5px; background:#f4f6f8;">Historial (Movimientos)</th></tr>`;
+                items.forEach(item => {
+                    let movsHtml = item.movs.map(m => `• ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>');
+                    html += `<tr><td style="padding:5px;">${item.nombre}</td><td style="padding:5px;">${item.base} ${item.moneda}</td><td style="padding:5px;">${movsHtml || 'Sin movimientos registrados'}</td></tr>`;
+                });
+                html += `</table>`;
+            };
+
+            addSection("Cuentas", state.cuentas);
+            addSection("Ingresos", state.ingresos);
+            addSection("Gastos", state.gastos);
+            addSection("Potes y Reservas", state.potes);
+            addSection("Préstamos Otorgados", state.prestamos);
+            
+            element.innerHTML = html;
+            
+            const opt = {
+                margin: 10,
+                filename: `Reporte_${tipo}_${state.config.mes}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Genera el PDF y si es final, lo guarda en la base de datos
+            html2pdf().set(opt).from(element).save().then(() => {
+                if(tipo === 'Final') {
+                    const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
+                    set(refHistorial, state);
+                }
+            });
+        };
+
         window.ejecutarCierre = () => {
             const nuevoMes = document.getElementById('in-nuevo-mes').value;
-            if(!nuevoMes) return alert("Debes colocar el nombre del nuevo mes para continuar.");
+            if(!nuevoMes) return alert("Debes colocar el nombre del nuevo mes para continuar con el cierre final.");
 
-            if(confirm(`¿Archivar los datos actuales como histórico de ${state.config.mes} y comenzar ${nuevoMes}? Los ingresos recibidos y gastos pagados volverán a cero.`)) {
+            if(confirm(`¿Archivar los datos como histórico de ${state.config.mes} y comenzar ${nuevoMes}? Se descargará un PDF y los pagos/ingresos volverán a cero.`)) {
                 
-                // 1. Guardar copia en el nodo 'historico'
-                const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
-                set(refHistorial, state);
+                window.generarReportePDF('Final');
 
-                // 2. Limpiar Movimientos de tipo Pago/Recibido (Reset de mes)
-                state.gastos.forEach(g => { g.movs = g.movs.filter(m => m.tipo !== 'Pago'); });
-                state.ingresos.forEach(i => { i.movs = i.movs.filter(m => m.tipo !== 'Recibido'); });
-                
-                state.config.mes = nuevoMes;
-                
-                // 3. Sobreescribir estado actual
-                set(ref(db, 'finanzas_master/estado'), state).then(() => {
-                    document.getElementById('in-nuevo-mes').value = '';
-                    alert(`¡Mes archivado! Iniciando ciclo de ${nuevoMes}.`);
-                    renderTodo();
-                });
+                // Esperamos un momento para que se genere el PDF antes de resetear
+                setTimeout(() => {
+                    state.gastos.forEach(g => { g.movs = g.movs.filter(m => m.tipo !== 'Pago'); });
+                    state.ingresos.forEach(i => { i.movs = i.movs.filter(m => m.tipo !== 'Recibido'); });
+                    
+                    state.config.mes = nuevoMes;
+                    
+                    set(ref(db, 'finanzas_master/estado'), state).then(() => {
+                        document.getElementById('in-nuevo-mes').value = '';
+                        alert(`¡Mes archivado! Iniciando ciclo de ${nuevoMes}.`);
+                        renderTodo();
+                    });
+                }, 1500);
             }
         };
 
@@ -620,7 +703,7 @@
             onValue(ref(db, 'finanzas_master/estado'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 };
+                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0, venDanEur: 0, venLuisEur: 0 };
                     state.cuentas = asegurarHistorial(data.cuentas);
                     state.ingresos = asegurarHistorial(data.ingresos);
                     state.gastos = asegurarHistorial(data.gastos);
