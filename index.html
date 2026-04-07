@@ -706,17 +706,18 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            // Usamos un elemento DOM para evitar el PDF en blanco
-            element.innerHTML = html;
+            // Envolvemos el string HTML en un div con los estilos necesarios y lo pasamos directo.
+            // Esto soluciona de raíz el PDF en blanco causado por enviar un elemento DOM sin adjuntar.
+            const contenidoFinal = `<div style="padding: 20px; font-family: sans-serif;">${html}</div>`;
             
             if(tipo === 'Parcial') {
-                html2pdf().set(opt).from(element).save();
+                html2pdf().set(opt).from(contenidoFinal).save();
             } else {
                 // Si es final, convertimos el PDF a Base64 y lo anidamos en la base de datos
-                html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+                html2pdf().set(opt).from(contenidoFinal).toPdf().get('pdf').then(function (pdf) {
                     state.pdfArchivado = pdf.output('datauristring'); // Guardar Base64
                     
-                    html2pdf().set(opt).from(element).save().then(() => {
+                    html2pdf().set(opt).from(contenidoFinal).save().then(() => {
                         const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
                         set(refHistorial, state).then(() => {
                             window.cargarHistoricos();
