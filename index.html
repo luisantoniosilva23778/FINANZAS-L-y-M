@@ -657,15 +657,22 @@
                 const data = snapshot.val();
                 lista.innerHTML = '';
                 if(data) {
-                    Object.keys(data).forEach(mesKey => {
-                        let btnPdf = data[mesKey].pdfArchivado ? `<a href="${data[mesKey].pdfArchivado}" download="Respaldo_${mesKey}.pdf" style="text-decoration:none; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:var(--a); color:white; margin-right:5px;">📄 Ver PDF</a>` : '';
+                    Object.keys(data).reverse().forEach(mesKey => {
+                        const record = data[mesKey];
+                        const tipoCierre = record.tipoCierre || (mesKey.includes('Parcial') ? 'Parcial' : 'Final');
+                        const colorBadge = tipoCierre === 'Parcial' ? 'var(--a)' : 'var(--d)';
+                        
+                        let btnPdf = record.pdfBase64 ? `<a href="${record.pdfBase64}" download="Reporte_${mesKey}.pdf" class="btn btn-save-main" style="margin:0; padding: 5px 10px; font-size:0.8rem; text-decoration:none;">📄 Descargar PDF</a>` : '';
                         
                         lista.innerHTML += `
-                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
-                            <strong>${mesKey}</strong>
+                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; gap:10px; flex-wrap: wrap;">
                             <div>
-                                ${btnPdf}
+                                <strong>${mesKey}</strong>
+                                <span class="badge" style="background: ${colorBadge}; color: white; margin-left: 5px;">${tipoCierre}</span>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
                                 <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
+                                ${btnPdf}
                             </div>
                         </li>`;
                     });
