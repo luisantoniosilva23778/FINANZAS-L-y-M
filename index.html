@@ -196,6 +196,14 @@
                         <button class="btn btn-add" style="margin-top: 0; background: var(--d);" onclick="window.ejecutarCierre()">EJECUTAR CIERRE FINAL Y ARCHIVAR</button>
                     </div>
                 </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: var(--s);">Historial de Meses Archivados</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">Aquí puedes ver los meses que ya has cerrado en tu base de datos de Firebase.</p>
+                    <ul id="lista-historicos" style="list-style: none; padding: 0;">
+                        <li><i>Cargando registros históricos...</i></li>
+                    </ul>
+                </div>
             </section>
 
             <section id="potes" class="tab-content">
@@ -228,22 +236,15 @@
 
             <section id="venezuela" class="tab-content">
                 <div class="card">
-                    <h3>Dinero Disponible para Venezuela</h3>
-                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">(Ingresa el saldo en Euros, se calculará su equivalente en USD automáticamente)</p>
-                    <div class="grid-2">
-                        <div class="analisis-caja">
-                            <h4 style="color: var(--p); margin-bottom: 10px;">DANYELA</h4>
-                            <label>Disponible en Euros (€):</label>
-                            <input type="number" id="ven-dan-eur" onchange="window.actualizarConfig('venDanEur', this.value)" style="margin-bottom: 10px;">
-                            <p>Equivalente en Dólares ($): <strong id="ven-dan-usd" style="color: var(--s); font-size: 1.2rem;">0.00</strong></p>
-                        </div>
-                        <div class="analisis-caja">
-                            <h4 style="color: var(--p); margin-bottom: 10px;">LUIS</h4>
-                            <label>Disponible en Euros (€):</label>
-                            <input type="number" id="ven-luis-eur" onchange="window.actualizarConfig('venLuisEur', this.value)" style="margin-bottom: 10px;">
-                            <p>Equivalente en Dólares ($): <strong id="ven-luis-usd" style="color: var(--s); font-size: 1.2rem;">0.00</strong></p>
-                        </div>
+                    <h3>Dinero Disponible para Venezuela (Historial y Movimientos)</h3>
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #64748b;">(El saldo se maneja en Euros y se muestra su equivalente en Dólares automáticamente)</p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Persona / Fondo</th><th>Saldo Inicial (€)</th><th>Saldo Actual (€)</th><th>Equivalente en USD ($)</th><th>Acciones</th></tr></thead>
+                            <tbody id="body-venezuela"></tbody>
+                        </table>
                     </div>
+                    <button class="btn btn-add" onclick="window.agregarItem('venezuela')">+ Nuevo Fondo Vzla (Ej: Danyela, Luis)</button>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
                 </div>
             </section>
@@ -299,8 +300,8 @@
 
         // ESTADO LOCAL (Data Model)
         let state = {
-            config: { mes: "Marzo 2026", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0, venDanEur: 0, venLuisEur: 0 },
-            cuentas: [], ingresos: [], gastos: [], potes: [], prestamos: []
+            config: { mes: "Marzo 2026", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 },
+            cuentas: [], ingresos: [], gastos: [], potes: [], prestamos: [], venezuela: []
         };
         let activeModal = { tipoCat: null, index: null };
 
@@ -357,7 +358,7 @@
             document.getElementById('modal-title').innerText = `Historial: ${item.nombre}`;
             
             const sel = document.getElementById('mod-tipo');
-            if(cat === 'cuentas' || cat === 'potes') {
+            if(cat === 'cuentas' || cat === 'potes' || cat === 'venezuela') {
                 sel.innerHTML = '<option value="Ingreso">Ingreso (+)</option><option value="Retiro">Retiro (-)</option>';
             } else if (cat === 'ingresos') {
                 sel.innerHTML = '<option value="Recibido">Me Pagaron/Recibido (+)</option><option value="Ajuste">Ajustar Base (+)</option>';
@@ -424,7 +425,7 @@
             let ejecutado = 0; // Recibido(Ingresos) o Pagado(Gastos/Prestamos)
             
             item.movs.forEach(m => {
-                if(cat === 'cuentas' || cat === 'potes') {
+                if(cat === 'cuentas' || cat === 'potes' || cat === 'venezuela') {
                     if(m.tipo === 'Ingreso') saldo += m.monto;
                     if(m.tipo === 'Retiro') saldo -= m.monto;
                 } else if(cat === 'ingresos') {
@@ -452,14 +453,6 @@
             document.getElementById('in-meta').value = state.config.metaMensual;
             document.getElementById('in-ahorro').value = state.config.ahorroMes;
             
-            document.getElementById('ven-dan-eur').value = state.config.venDanEur || 0;
-            document.getElementById('ven-luis-eur').value = state.config.venLuisEur || 0;
-            
-            // Calculo a USD: EUR / Tasa (ej. si 1 USD = 0.85 EUR, 100 EUR = 117.64 USD)
-            let tasa = state.config.tasaUsd || 1;
-            document.getElementById('ven-dan-usd').innerText = fCur((state.config.venDanEur || 0) / tasa);
-            document.getElementById('ven-luis-usd').innerText = fCur((state.config.venLuisEur || 0) / tasa);
-
             let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0;
             let sumBaseIngresos = 0, sumBaseGastos = 0;
             
@@ -548,6 +541,27 @@
             renderTable('gastos', 'body-gastos', 'flujo');
             renderTable('prestamos', 'body-prestamos', 'prestamo');
 
+            // RENDER ESPECIAL PARA VENEZUELA (Euros a Dólares)
+            const tbodyVzla = document.getElementById('body-venezuela');
+            if (tbodyVzla) {
+                tbodyVzla.innerHTML = '';
+                state.venezuela.forEach((item, i) => {
+                    const c = calcularSaldo(item, 'venezuela');
+                    let eqUsd = c.saldo / (state.config.tasaUsd || 1);
+                    tbodyVzla.innerHTML += `
+                        <tr>
+                            <td><input type="text" value="${item.nombre}" placeholder="Ej: Danyela" onchange="window.actualizarCampo('venezuela', ${i}, 'nombre', this.value)"></td>
+                            <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('venezuela', ${i}, 'base', this.value)"></td>
+                            <td><strong>${fCur(c.saldo)} €</strong></td>
+                            <td style="color:var(--s); font-weight:bold;">$ ${fCur(eqUsd)}</td>
+                            <td>
+                                <button class="btn btn-action" onclick="window.abrirModal('venezuela', ${i})">Historial</button>
+                                <button class="btn btn-del" onclick="window.eliminarItem('venezuela', ${i})">X</button>
+                            </td>
+                        </tr>`;
+                });
+            }
+
             // --- LÓGICA DE BALANCE AVANZADO ---
             const eqComprometidoTotal = eqPotes + eqGastosPendientes;
             const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
@@ -601,6 +615,27 @@
             }
         }
 
+        // --- MOSTRAR LISTA DE HISTÓRICOS ---
+        window.cargarHistoricos = () => {
+            onValue(ref(db, 'finanzas_master/historico'), (snapshot) => {
+                const lista = document.getElementById('lista-historicos');
+                if(!lista) return;
+                const data = snapshot.val();
+                lista.innerHTML = '';
+                if(data) {
+                    Object.keys(data).forEach(mesKey => {
+                        lista.innerHTML += `
+                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${mesKey}</strong>
+                            <span class="badge" style="background: var(--s); color: white;">Guardado en Nube</span>
+                        </li>`;
+                    });
+                } else {
+                    lista.innerHTML = '<li><i>Aún no hay meses archivados.</i></li>';
+                }
+            });
+        };
+
         // --- CIERRE DE MES Y EXPORTAR ---
         window.generarReportePDF = (tipo) => {
             const element = document.createElement('div');
@@ -622,8 +657,7 @@
             addSection("Gastos", state.gastos);
             addSection("Potes y Reservas", state.potes);
             addSection("Préstamos Otorgados", state.prestamos);
-            
-            element.innerHTML = html;
+            addSection("Fondos Venezuela", state.venezuela);
             
             const opt = {
                 margin: 10,
@@ -633,11 +667,13 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            // Genera el PDF y si es final, lo guarda en la base de datos
-            html2pdf().set(opt).from(element).save().then(() => {
+            // Genera el PDF pasando la variable HTML directo (Soluciona el PDF en blanco)
+            html2pdf().set(opt).from(html).save().then(() => {
                 if(tipo === 'Final') {
                     const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
-                    set(refHistorial, state);
+                    set(refHistorial, state).then(() => {
+                        window.cargarHistoricos(); // Refresca la lista visual
+                    });
                 }
             });
         };
@@ -703,13 +739,17 @@
             onValue(ref(db, 'finanzas_master/estado'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0, venDanEur: 0, venLuisEur: 0 };
+                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 };
                     state.cuentas = asegurarHistorial(data.cuentas);
                     state.ingresos = asegurarHistorial(data.ingresos);
                     state.gastos = asegurarHistorial(data.gastos);
                     state.potes = asegurarHistorial(data.potes);
                     state.prestamos = asegurarHistorial(data.prestamos);
+                    state.venezuela = asegurarHistorial(data.venezuela);
                     renderTodo();
+                }
+            });
+            window.cargarHistoricos(); // Llama a la lista visual de archivos guardados
                 }
             });
         }
