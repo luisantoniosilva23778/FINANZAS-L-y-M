@@ -379,4 +379,95 @@
                 state[cat].forEach((item, i) => {
                     const selMoneda = `
                         <select onchange="window.actualizarCampo('${cat}', ${i}, 'moneda', this.value)">
-                            <option value="EUR" ${ite
+                            <option value="EUR" ${item.moneda==='EUR'?'selected':''}>EUR</option>
+                            <option value="USD" ${item.moneda==='USD'?'selected':''}>USD</option>
+                        </select>`;
+                    
+                    const c = calcularSaldo(item, cat);
+                    let eqEur = 0;
+
+                    if(type === 'saldo') {
+                        eqEur = toEur(c.saldo, item.moneda);
+                        if(cat === 'cuentas') eqLiquidez += eqEur;
+                        if(cat === 'potes') eqComprometido += eqEur;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><input type="text" value="${item.nombre}" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td>${selMoneda}</td>
+                                <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
+                                <td><strong>${fCur(c.saldo)}</strong></td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td>
+                                    <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
+                                    <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
+                                </td>
+                            </tr>`;
+                    } else { // type === 'deuda' (Gastos y Préstamos)
+                        eqEur = toEur(c.resta, item.moneda);
+                        if(cat === 'gastos') eqComprometido += eqEur;
+                        if(cat === 'prestamos') eqPorCobrar += eqEur;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><input type="text" value="${item.nombre}" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td>${selMoneda}</td>
+                                <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
+                                <td><span style="color:var(--s);">${fCur(c.pagado)}</span></td>
+                                <td style="color:var(--d); font-weight:bold;">${fCur(c.resta)}</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td>
+                                    <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
+                                    <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
+                                </td>
+                            </tr>`;
+                    }
+                });
+            };
+
+            renderTable('cuentas', 'body-cuentas', 'saldo');
+            renderTable('potes', 'body-potes', 'saldo');
+            renderTable('gastos', 'body-gastos', 'deuda');
+            renderTable('prestamos', 'body-prestamos', 'deuda');
+
+            // Actualizar EL TODO
+            document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' €';
+            document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
+            document.getElementById('dash-comp').innerText = fCur(eqComprometido) + ' €';
+            document.getElementById('dash-real').innerText = fCur(eqLiquidez - eqComprometido) + ' €';
+        }
+
+        // --- FIREBASE SYNC Y CIERRE ---
+        window.guardarFirebase = () => {
+            set(ref(db, 'finanzas_master/estado'), state).then(() => alert('Datos sincronizados en la nube.'));
+            renderTodo();
+        };
+
+        function cargarFirebase() {
+            onValue(ref(db, 'finanzas_master/estado'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    state = data;
+                    if(!state.cuentas) state.cuentas = [];
+                    if(!state.gastos) state.gastos = [];
+                    if(!state.potes) state.potes = [];
+                    if(!state.prestamos) state.prestamos = [];
+                    renderTodo();
+                }
+            });
+        }
+
+        window.ejecutarCierre = () => {
+            if(confirm("¿Seguro de cerrar el mes? Los pagos de GASTOS volverán a 0, preparándose para el próximo mes.")) {
+                // Borramos los movimientos tipo "Pago" de todos los gastos
+                state.gastos.forEach(g => {
+                    g.movs = g.movs.filter(m => m.tipo !== 'Pago');
+                });
+                alert("Cierre ejecutado. Todos los gastos aparecen como 'Por pagar' de nuevo.");
+                window.guardarFirebase();
+            }
+        };
+
+    </script>
+</body>
+</html>
