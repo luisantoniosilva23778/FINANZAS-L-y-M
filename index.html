@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas M&L - Versión Excel PRO</title>
+    <title>Finanzas M&L - Control Maestro PRO</title>
     <style>
-        :root { --bg: #f4f6f8; --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --card: #fff; --border: #e2e8f0; }
+        :root { --bg: #f4f6f8; --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --card: #fff; --border: #e2e8f0; --w: #f59e0b; }
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
         body { background: var(--bg); color: #334155; padding-bottom: 50px; }
         
@@ -21,15 +21,17 @@
         .card { background: var(--card); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .card h3 { color: var(--p); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
-        /* Dashboard con Desglose */
         .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        
         .stat-box { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: white; }
         .stat-header { padding: 20px; color: white; text-align: center; }
         .stat-header h2 { font-size: 1.8rem; margin-top: 10px; }
         .stat-list { padding: 15px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; }
         .stat-list li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #e2e8f0; }
         
-        .bg-blue { background: var(--a); } .bg-green { background: var(--s); } .bg-dark { background: var(--p); } .bg-gray { background: #64748b; }
+        .bg-blue { background: var(--a); } .bg-green { background: var(--s); } .bg-dark { background: var(--p); } .bg-gray { background: #64748b; } .bg-warn { background: var(--w); }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 10px; }
@@ -44,6 +46,10 @@
         .btn-del { background: var(--d); font-size: 0.8rem; }
         .btn-save-main { background: var(--s); font-size: 1.1rem; padding: 15px; width: 100%; margin-top: 20px; }
         .btn-export { background: #047857; color: white; padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+
+        .analisis-caja { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .analisis-fila { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; }
+        .bold-res { font-weight: bold; font-size: 1.1rem; color: var(--p); }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 8px; padding: 20px; max-height: 90vh; overflow-y: auto; }
@@ -75,7 +81,7 @@
         <nav>
             <button class="tab-btn active" onclick="window.showTab('resumen')">EL TODO</button>
             <button class="tab-btn" onclick="window.showTab('cuentas')">CUENTAS</button>
-            <button class="tab-btn" onclick="window.showTab('gastos')">GASTOS</button>
+            <button class="tab-btn" onclick="window.showTab('compromisos')">COMPROMISOS MENS.</button>
             <button class="tab-btn" onclick="window.showTab('potes')">POTES</button>
             <button class="tab-btn" onclick="window.showTab('prestamos')">PRÉSTAMOS</button>
             <button class="tab-btn" onclick="window.showTab('config')">CONFIG</button>
@@ -85,37 +91,19 @@
             <section id="resumen" class="tab-content active">
                 <div class="grid-dashboard">
                     <div class="stat-box">
-                        <div class="stat-header bg-blue">
-                            <p>Líquidez Total</p>
-                            <h2 id="dash-liq">0.00 €</h2>
-                        </div>
+                        <div class="stat-header bg-blue"><p>Líquidez Total</p><h2 id="dash-liq">0.00 €</h2></div>
                         <ul class="stat-list" id="lista-liq"></ul>
                     </div>
-                    
                     <div class="stat-box">
-                        <div class="stat-header bg-dark">
-                            <p>Comprometido</p>
-                            <h2 id="dash-comp">0.00 €</h2>
-                        </div>
+                        <div class="stat-header bg-dark"><p>Comprometido (Potes + Gastos)</p><h2 id="dash-comp">0.00 €</h2></div>
                         <ul class="stat-list" id="lista-comp"></ul>
                     </div>
-
                     <div class="stat-box">
-                        <div class="stat-header bg-gray">
-                            <p>Por Cobrar (Préstamos)</p>
-                            <h2 id="dash-cobrar">0.00 €</h2>
-                        </div>
+                        <div class="stat-header bg-gray"><p>Por Cobrar (Préstamos)</p><h2 id="dash-cobrar">0.00 €</h2></div>
                         <ul class="stat-list" id="lista-cobrar"></ul>
                     </div>
-
                     <div class="stat-box">
-                        <div class="stat-header bg-green">
-                            <p>Contamos Realmente</p>
-                            <h2 id="dash-real">0.00 €</h2>
-                        </div>
-                        <div style="padding: 15px; text-align:center; font-size:0.9rem; color:#666;">
-                            Liquidez Total <br> <strong>Menos</strong> <br> Comprometido
-                        </div>
+                        <div class="stat-header bg-green"><p>Contamos Realmente</p><h2 id="dash-real">0.00 €</h2></div>
                     </div>
                 </div>
             </section>
@@ -134,23 +122,80 @@
                 </div>
             </section>
 
-            <section id="gastos" class="tab-content">
+            <section id="compromisos" class="tab-content">
+                
                 <div class="card">
-                    <h3>Gastos del Mes (Se suman a Comprometido)</h3>
+                    <h3 style="color: var(--s);">1. Ingresos Mensuales</h3>
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Descripción</th><th>Moneda</th><th>Costo Inicial</th><th>Pagado</th><th>Resta (Falta)</th><th>Eq. Euros (Falta)</th><th>Acciones</th></tr></thead>
+                            <thead><tr><th>Descripción</th><th>Moneda</th><th>Ingreso Base</th><th>Recibido</th><th>Falta Recibir</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
+                            <tbody id="body-ingresos"></tbody>
+                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Ingresos:</td><td id="sub-ingresos" style="font-weight:bold; color:var(--s);">0.00 €</td><td></td></tr></tfoot>
+                        </table>
+                    </div>
+                    <button class="btn btn-add" onclick="window.agregarItem('ingresos')">+ Nuevo Ingreso</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--d);">2. Gastos Mensuales</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Descripción</th><th>Moneda</th><th>Costo Base</th><th>Pagado</th><th>Falta Pagar</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-gastos"></tbody>
+                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Gastos:</td><td id="sub-gastos" style="font-weight:bold; color:var(--d);">0.00 €</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('gastos')">+ Nuevo Gasto</button>
-                    <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>3. Balance del Mes y Meta</h3>
+                        <div class="analisis-caja">
+                            <div class="analisis-fila"><span>Total Finanzas (Liq + Cobrar - Potes):</span> <strong id="bal-finanzas">0.00 €</strong></div>
+                            <div class="analisis-fila"><span>Neto del Mes (Ingresos - Gastos):</span> <strong id="bal-neto">0.00 €</strong></div>
+                            <div class="analisis-fila bold-res"><span>Resultado Importante:</span> <strong id="bal-resultado">0.00 €</strong></div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-weight:bold;">Meta a alcanzar este mes (€):</label>
+                            <input type="number" id="in-meta" onchange="window.actualizarConfig('metaMensual', this.value)" placeholder="Ej: 30000">
+                        </div>
+
+                        <div class="analisis-caja" style="text-align: center;">
+                            <p style="margin-bottom: 5px;">Superávit / Déficit (Res. Importante - Meta)</p>
+                            <h2 id="bal-diferencia" style="font-size: 2rem;">0.00 €</h2>
+                            <span id="bal-badge" class="badge">--</span>
+                        </div>
+                        <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Modificaciones</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>4. Evolución a Futuro (1 Año)</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-weight:bold;">Valor a ahorrar en cada mes (€):</label>
+                            <input type="number" id="in-ahorro" onchange="window.actualizarConfig('ahorroMes', this.value)" placeholder="Ej: 645">
+                        </div>
+                        <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
+                            <table>
+                                <thead><tr><th>Mes Futuro</th><th>Capital Proyectado</th></tr></thead>
+                                <tbody id="body-proyeccion"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="border: 2px solid var(--p); background: #f8fafc;">
+                    <h3 style="color: var(--p);">5. Cierre de Mes (Histórico)</h3>
+                    <p style="margin-bottom: 15px;">Al cerrar, se guardará el estado actual en el histórico. Los montos base (Ingresos y Gastos) se mantendrán, pero los valores "Recibido" y "Pagado" volverán a cero para iniciar el nuevo mes.</p>
+                    <input type="text" id="in-nuevo-mes" placeholder="Escribe el nombre del próximo mes (Ej: Abril 2026)" style="margin-bottom: 10px;">
+                    <button class="btn btn-add" onclick="window.ejecutarCierre()">EJECUTAR CIERRE Y ARCHIVAR</button>
                 </div>
             </section>
 
             <section id="potes" class="tab-content">
                 <div class="card">
-                    <h3>Potes y Reservas Fijas (Se suman a Comprometido)</h3>
+                    <h3>Potes y Reservas Fijas (Comprometido)</h3>
                     <div class="table-wrap">
                         <table>
                             <thead><tr><th>Nombre Reserva</th><th>Moneda</th><th>Saldo Inicial</th><th>Saldo Actual</th><th>Eq. Euros</th><th>Acciones</th></tr></thead>
@@ -164,28 +209,24 @@
 
             <section id="prestamos" class="tab-content">
                 <div class="card">
-                    <h3>Dinero Prestado a Terceros (Por Cobrar)</h3>
+                    <h3>Préstamos por Cobrar</h3>
                     <div class="table-wrap">
                         <table>
                             <thead><tr><th>Deudor</th><th>Moneda</th><th>Monto Inicial</th><th>Cobrado</th><th>Falta Cobrar</th><th>Eq. Euros (Falta)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-prestamos"></tbody>
                         </table>
                     </div>
-                    <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo Préstamo Otorgado</button>
+                    <button class="btn btn-add" onclick="window.agregarItem('prestamos')">+ Nuevo Préstamo</button>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
                 </div>
             </section>
 
             <section id="config" class="tab-content">
                 <div class="card">
-                    <h3>Configuración de Moneda y Mes</h3>
+                    <h3>Configuración General</h3>
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight:bold;">Tasa USD a EUR (1 USD = X EUR):</label>
                         <input type="number" step="0.01" id="in-tasa" onchange="window.actualizarConfig('tasaUsd', this.value)">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="font-weight:bold;">Mes Actual:</label>
-                        <input type="text" id="in-mes" onchange="window.actualizarConfig('mes', this.value)">
                     </div>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Configuración</button>
                 </div>
@@ -215,9 +256,9 @@
             </table>
         </div>
     </div>
-        <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyD2iWa3ScvMiqiPpic86o-jj95RRH1dWyU",
@@ -229,13 +270,14 @@
         });
         const db = getDatabase(app);
 
-        // Estado local
+        // ESTADO LOCAL (Data Model)
         let state = {
-            config: { mes: "Marzo 2026", tasaUsd: 0.85 },
-            cuentas: [], gastos: [], potes: [], prestamos: []
+            config: { mes: "Marzo 2026", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 },
+            cuentas: [], ingresos: [], gastos: [], potes: [], prestamos: []
         };
         let activeModal = { tipoCat: null, index: null };
 
+        // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
         window.login = () => {
             if(document.getElementById('pass').value === '1234') {
                 document.getElementById('login-screen').style.display = 'none';
@@ -251,22 +293,19 @@
             renderTodo();
         };
 
+        // --- UTILIDADES ---
         const toEur = (monto, moneda) => moneda === 'USD' ? monto * state.config.tasaUsd : monto;
         const fCur = (val) => Number(val).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        const asegurarHistorial = (array) => array ? array.map(item => ({ ...item, movs: item.movs || [] })) : [];
 
-        // Asegurador de arrays (Evita el bug de Firebase)
-        const asegurarHistorial = (array) => {
-            if(!array) return [];
-            return array.map(item => ({ ...item, movs: item.movs || [] }));
-        };
-
+        // --- CRUD BÁSICO ---
         window.agregarItem = (cat) => {
             state[cat].push({ nombre: '', moneda: 'EUR', base: 0, movs: [] });
             renderTodo();
         };
 
         window.eliminarItem = (cat, index) => {
-            if(confirm('¿Eliminar registro?')) {
+            if(confirm('¿Eliminar registro de forma permanente?')) {
                 state[cat].splice(index, 1);
                 renderTodo();
             }
@@ -279,12 +318,12 @@
         };
 
         window.actualizarConfig = (campo, valor) => {
-            if(campo === 'tasaUsd') state.config[campo] = parseFloat(valor) || 0.85;
-            else state.config[campo] = valor;
+            if(campo === 'mes') state.config[campo] = valor;
+            else state.config[campo] = parseFloat(valor) || 0;
             renderTodo();
         };
 
-        // Modal
+        // --- MODAL Y MOVIMIENTOS ---
         window.abrirModal = (cat, index) => {
             activeModal = { tipoCat: cat, index: index };
             const item = state[cat][index];
@@ -293,8 +332,10 @@
             const sel = document.getElementById('mod-tipo');
             if(cat === 'cuentas' || cat === 'potes') {
                 sel.innerHTML = '<option value="Ingreso">Ingreso (+)</option><option value="Retiro">Retiro (-)</option>';
+            } else if (cat === 'ingresos') {
+                sel.innerHTML = '<option value="Recibido">Me Pagaron/Recibido (+)</option><option value="Ajuste">Ajustar Base (+)</option>';
             } else if (cat === 'gastos') {
-                sel.innerHTML = '<option value="Pago">Abonar al Pago (+)</option><option value="Ajuste">Ajustar Costo (+)</option>';
+                sel.innerHTML = '<option value="Pago">Abonar al Gasto (+)</option><option value="Ajuste">Ajustar Costo (+)</option>';
             } else if (cat === 'prestamos') {
                 sel.innerHTML = '<option value="Abono">Me Abonaron (+)</option><option value="Incremento">Presté Más (+)</option>';
             }
@@ -302,10 +343,7 @@
             renderModalMovs();
         };
 
-        window.cerrarModal = () => {
-            document.getElementById('modal-historial').style.display = 'none';
-            renderTodo();
-        };
+        window.cerrarModal = () => { document.getElementById('modal-historial').style.display = 'none'; renderTodo(); };
 
         window.agregarMovimiento = () => {
             const m = parseFloat(document.getElementById('mod-monto').value);
@@ -332,72 +370,74 @@
             const tbody = document.getElementById('modal-body-movs');
             tbody.innerHTML = '';
             item.movs.forEach((m, i) => {
-                let isSubtract = (m.tipo === 'Retiro' || m.tipo === 'Abono');
+                let isSub = (m.tipo === 'Retiro' || m.tipo === 'Pago' || m.tipo === 'Abono');
                 tbody.innerHTML += `
                     <tr>
                         <td>${m.fecha}</td>
                         <td><span class="badge">${m.tipo}</span></td>
-                        <td style="color:${isSubtract ? 'var(--d)' : 'var(--s)'}; font-weight:bold;">${m.monto}</td>
+                        <td style="color:${isSub ? 'var(--d)' : 'var(--s)'}; font-weight:bold;">${m.monto}</td>
                         <td>${m.obs}</td>
                         <td><button class="btn btn-del" onclick="window.eliminarMov(${i})">X</button></td>
                     </tr>`;
             });
         }
 
-        // Cálculos
+        // --- MOTOR DE CÁLCULO CONTABLE ---
         function calcularSaldo(item, cat) {
             let saldo = item.base;
-            let sumEgresos = 0; 
+            let ejecutado = 0; // Recibido(Ingresos) o Pagado(Gastos/Prestamos)
+            
             item.movs.forEach(m => {
                 if(cat === 'cuentas' || cat === 'potes') {
                     if(m.tipo === 'Ingreso') saldo += m.monto;
                     if(m.tipo === 'Retiro') saldo -= m.monto;
+                } else if(cat === 'ingresos') {
+                    if(m.tipo === 'Ajuste') saldo += m.monto; 
+                    if(m.tipo === 'Recibido') ejecutado += m.monto;
                 } else if(cat === 'gastos') {
                     if(m.tipo === 'Ajuste') saldo += m.monto; 
-                    if(m.tipo === 'Pago') sumEgresos += m.monto;
+                    if(m.tipo === 'Pago') ejecutado += m.monto;
                 } else if(cat === 'prestamos') {
                     if(m.tipo === 'Incremento') saldo += m.monto; 
-                    if(m.tipo === 'Abono') sumEgresos += m.monto;
+                    if(m.tipo === 'Abono') ejecutado += m.monto;
                 }
             });
-            if(cat === 'gastos' || cat === 'prestamos') return { total: saldo, pagado: sumEgresos, resta: Math.max(0, saldo - sumEgresos) };
+
+            if(cat === 'ingresos' || cat === 'gastos' || cat === 'prestamos') {
+                return { total: saldo, ejecutado: ejecutado, resta: Math.max(0, saldo - ejecutado) };
+            }
             return { saldo: saldo };
         }
 
         function renderTodo() {
+            // Actualizar Cabeceras e Inputs de Config
             document.getElementById('header-mes').innerText = state.config.mes;
             document.getElementById('in-tasa').value = state.config.tasaUsd;
-            document.getElementById('in-mes').value = state.config.mes;
+            document.getElementById('in-meta').value = state.config.metaMensual;
+            document.getElementById('in-ahorro').value = state.config.ahorroMes;
 
-            let eqLiquidez = 0, eqComprometido = 0, eqPorCobrar = 0;
+            let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0;
+            let sumBaseIngresos = 0, sumBaseGastos = 0;
             
-            // Listas para el Dashboard
             let htmlLiq = "", htmlComp = "", htmlCobrar = "";
 
+            // Render Tablas Base
             const renderTable = (cat, tbodyId, type) => {
                 const tbody = document.getElementById(tbodyId);
                 tbody.innerHTML = '';
                 
                 state[cat].forEach((item, i) => {
-                    const selMoneda = `
-                        <select onchange="window.actualizarCampo('${cat}', ${i}, 'moneda', this.value)">
-                            <option value="EUR" ${item.moneda==='EUR'?'selected':''}>EUR</option>
-                            <option value="USD" ${item.moneda==='USD'?'selected':''}>USD</option>
-                        </select>`;
+                    const selMoneda = `<select onchange="window.actualizarCampo('${cat}', ${i}, 'moneda', this.value)">
+                        <option value="EUR" ${item.moneda==='EUR'?'selected':''}>EUR</option>
+                        <option value="USD" ${item.moneda==='USD'?'selected':''}>USD</option>
+                    </select>`;
                     
                     const c = calcularSaldo(item, cat);
-                    let eqEur = 0;
-
+                    
                     if(type === 'saldo') {
-                        eqEur = toEur(c.saldo, item.moneda);
-                        if(cat === 'cuentas') {
-                            eqLiquidez += eqEur;
-                            htmlLiq += `<li><span>${item.nombre || 'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
-                        }
-                        if(cat === 'potes') {
-                            eqComprometido += eqEur;
-                            htmlComp += `<li><span>${item.nombre || 'Pote'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
-                        }
+                        let eqEur = toEur(c.saldo, item.moneda);
+                        if(cat === 'cuentas') { eqLiquidez += eqEur; htmlLiq += `<li><span>${item.nombre||'Cuenta'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
+                        if(cat === 'potes') { eqPotes += eqEur; htmlComp += `<li><span>Pote: ${item.nombre||'Reserva'}</span> <strong>${fCur(eqEur)} €</strong></li>`; }
 
                         tbody.innerHTML += `
                             <tr>
@@ -411,15 +451,16 @@
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
                                 </td>
                             </tr>`;
-                    } else { 
-                        eqEur = toEur(c.resta, item.moneda);
+                    } else if (type === 'flujo') {
+                        // Flujo: Ingresos y Gastos
+                        let eqEurBase = toEur(c.total, item.moneda); // Calculamos la "Base" en euros para el Neto
+                        let eqEurResta = toEur(c.resta, item.moneda);
+                        
+                        if(cat === 'ingresos') sumBaseIngresos += eqEurBase;
                         if(cat === 'gastos') {
-                            eqComprometido += eqEur;
-                            if(eqEur > 0) htmlComp += `<li><span style="color:var(--d)">Falta: ${item.nombre || 'Gasto'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
-                        }
-                        if(cat === 'prestamos') {
-                            eqPorCobrar += eqEur;
-                            if(eqEur > 0) htmlCobrar += `<li><span>${item.nombre || 'Deudor'}</span> <strong>${fCur(eqEur)} €</strong></li>`;
+                            sumBaseGastos += eqEurBase;
+                            eqGastosPendientes += eqEurResta;
+                            if(eqEurResta > 0) htmlComp += `<li><span style="color:var(--d)">Falta Pagar: ${item.nombre||'Gasto'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
                         }
 
                         tbody.innerHTML += `
@@ -427,9 +468,27 @@
                                 <td><input type="text" value="${item.nombre}" placeholder="Descripción" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
                                 <td>${selMoneda}</td>
                                 <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
-                                <td><span style="color:var(--s);">${fCur(c.pagado)}</span></td>
+                                <td><span style="color:${cat==='ingresos'?'var(--s)':'var(--s)'};">${fCur(c.ejecutado)}</span></td>
+                                <td style="color:${cat==='ingresos'?'var(--w)':'var(--d)'}; font-weight:bold;">${fCur(c.resta)}</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurBase)} €</td>
+                                <td>
+                                    <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
+                                    <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
+                                </td>
+                            </tr>`;
+                    } else if (type === 'prestamo') {
+                        let eqEurResta = toEur(c.resta, item.moneda);
+                        eqPorCobrar += eqEurResta;
+                        if(eqEurResta > 0) htmlCobrar += `<li><span>${item.nombre||'Deudor'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><input type="text" value="${item.nombre}" placeholder="Deudor" onchange="window.actualizarCampo('${cat}', ${i}, 'nombre', this.value)"></td>
+                                <td>${selMoneda}</td>
+                                <td><input type="number" value="${item.base}" onchange="window.actualizarCampo('${cat}', ${i}, 'base', this.value)"></td>
+                                <td><span style="color:var(--s);">${fCur(c.ejecutado)}</span></td>
                                 <td style="color:var(--d); font-weight:bold;">${fCur(c.resta)}</td>
-                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEur)} €</td>
+                                <td style="color:var(--a); font-weight:bold;">${fCur(eqEurResta)} €</td>
                                 <td>
                                     <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
@@ -441,50 +500,117 @@
 
             renderTable('cuentas', 'body-cuentas', 'saldo');
             renderTable('potes', 'body-potes', 'saldo');
-            renderTable('gastos', 'body-gastos', 'deuda');
-            renderTable('prestamos', 'body-prestamos', 'deuda');
+            renderTable('ingresos', 'body-ingresos', 'flujo');
+            renderTable('gastos', 'body-gastos', 'flujo');
+            renderTable('prestamos', 'body-prestamos', 'prestamo');
 
-            // Actualizar EL TODO (Stats + Listas)
+            // --- LÓGICA DE BALANCE AVANZADO ---
+            const eqComprometidoTotal = eqPotes + eqGastosPendientes;
+            const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
+            const netoMensual = sumBaseIngresos - sumBaseGastos;
+            const resultadoImportante = totalFinanzas - netoMensual;
+            const diferencia = resultadoImportante - state.config.metaMensual;
+
+            // Actualizar textos Dashboard (EL TODO)
             document.getElementById('dash-liq').innerText = fCur(eqLiquidez) + ' €';
-            document.getElementById('lista-liq').innerHTML = htmlLiq || "<li>Sin cuentas</li>";
-            
-            document.getElementById('dash-comp').innerText = fCur(eqComprometido) + ' €';
-            document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al día</li>";
-            
+            document.getElementById('dash-comp').innerText = fCur(eqComprometidoTotal) + ' €';
             document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
-            document.getElementById('lista-cobrar').innerHTML = htmlCobrar || "<li>Nadie debe</li>";
+            document.getElementById('dash-real').innerText = fCur(eqLiquidez - eqComprometidoTotal) + ' €';
             
-            document.getElementById('dash-real').innerText = fCur(eqLiquidez - eqComprometido) + ' €';
+            document.getElementById('lista-liq').innerHTML = htmlLiq || "<li>Sin cuentas</li>";
+            document.getElementById('lista-comp').innerHTML = htmlComp || "<li>Todo al día</li>";
+            document.getElementById('lista-cobrar').innerHTML = htmlCobrar || "<li>Nadie debe</li>";
+
+            // Actualizar textos Compromisos Mensuales
+            document.getElementById('sub-ingresos').innerText = fCur(sumBaseIngresos) + ' €';
+            document.getElementById('sub-gastos').innerText = fCur(sumBaseGastos) + ' €';
+            
+            document.getElementById('bal-finanzas').innerText = fCur(totalFinanzas) + ' €';
+            document.getElementById('bal-neto').innerText = fCur(netoMensual) + ' €';
+            document.getElementById('bal-resultado').innerText = fCur(resultadoImportante) + ' €';
+            
+            const divDiferencia = document.getElementById('bal-diferencia');
+            const badgeDiferencia = document.getElementById('bal-badge');
+            divDiferencia.innerText = fCur(diferencia) + ' €';
+            
+            if(diferencia > 0) {
+                divDiferencia.style.color = "var(--s)";
+                badgeDiferencia.innerText = "SUPERÁVIT";
+                badgeDiferencia.style.background = "var(--s)"; badgeDiferencia.style.color = "white";
+            } else if (diferencia < 0) {
+                divDiferencia.style.color = "var(--d)";
+                badgeDiferencia.innerText = "DÉFICIT";
+                badgeDiferencia.style.background = "var(--d)"; badgeDiferencia.style.color = "white";
+            } else {
+                divDiferencia.style.color = "var(--p)";
+                badgeDiferencia.innerText = "NEUTRO";
+                badgeDiferencia.style.background = "#e2e8f0"; badgeDiferencia.style.color = "var(--p)";
+            }
+
+            // Render Proyección 1 Año
+            const tbodyProy = document.getElementById('body-proyeccion');
+            tbodyProy.innerHTML = '';
+            let capProy = resultadoImportante;
+            for(let i=1; i<=12; i++) {
+                capProy += state.config.ahorroMes;
+                tbodyProy.innerHTML += `<tr><td>Mes +${i}</td><td style="font-weight:bold; color:var(--a);">${fCur(capProy)} €</td></tr>`;
+            }
         }
 
-        // --- EXPORTAR A EXCEL (CSV) ---
+        // --- CIERRE DE MES Y EXPORTAR ---
+        window.ejecutarCierre = () => {
+            const nuevoMes = document.getElementById('in-nuevo-mes').value;
+            if(!nuevoMes) return alert("Debes colocar el nombre del nuevo mes para continuar.");
+
+            if(confirm(`¿Archivar los datos actuales como histórico de ${state.config.mes} y comenzar ${nuevoMes}? Los ingresos recibidos y gastos pagados volverán a cero.`)) {
+                
+                // 1. Guardar copia en el nodo 'historico'
+                const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
+                set(refHistorial, state);
+
+                // 2. Limpiar Movimientos de tipo Pago/Recibido (Reset de mes)
+                state.gastos.forEach(g => { g.movs = g.movs.filter(m => m.tipo !== 'Pago'); });
+                state.ingresos.forEach(i => { i.movs = i.movs.filter(m => m.tipo !== 'Recibido'); });
+                
+                state.config.mes = nuevoMes;
+                
+                // 3. Sobreescribir estado actual
+                set(ref(db, 'finanzas_master/estado'), state).then(() => {
+                    document.getElementById('in-nuevo-mes').value = '';
+                    alert(`¡Mes archivado! Iniciando ciclo de ${nuevoMes}.`);
+                    renderTodo();
+                });
+            }
+        };
+
         window.exportarExcel = () => {
-            let csv = "\uFEFF"; // Para formato UTF-8 Excel
+            let csv = "\uFEFF"; // Para UTF-8
             csv += `REPORTE FINANCIERO - ${state.config.mes}\nTasa USD a EUR: ${state.config.tasaUsd}\n\n`;
 
-            const generarSeccion = (titulo, cat, type) => {
-                csv += `${titulo}\nNombre,Moneda,Base,Total / Resta,Eq. Euros\n`;
+            const generarSec = (titulo, cat, type) => {
+                csv += `${titulo}\nNombre,Moneda,Monto Base,Ejecutado / Total,Eq. Euros\n`;
                 state[cat].forEach(item => {
                     const c = calcularSaldo(item, cat);
                     let val = type === 'saldo' ? c.saldo : c.resta;
-                    let eq = toEur(val, item.moneda);
+                    let eq = toEur(type === 'saldo' ? c.saldo : (type === 'flujo' ? c.total : c.resta), item.moneda);
                     csv += `"${item.nombre}","${item.moneda}","${item.base}","${val}","${eq}"\n`;
                 });
                 csv += "\n";
             };
 
-            generarSeccion("CUENTAS", "cuentas", "saldo");
-            generarSeccion("POTES Y RESERVAS", "potes", "saldo");
-            generarSeccion("GASTOS PENDIENTES", "gastos", "deuda");
-            generarSeccion("PRÉSTAMOS (POR COBRAR)", "prestamos", "deuda");
+            generarSec("CUENTAS", "cuentas", "saldo");
+            generarSec("INGRESOS", "ingresos", "flujo");
+            generarSec("GASTOS", "gastos", "flujo");
+            generarSec("POTES", "potes", "saldo");
+            generarSec("PRÉSTAMOS", "prestamos", "prestamo");
 
             const a = document.createElement("a");
             a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-            a.download = `Finanzas_${state.config.mes.replace(" ", "_")}.csv`;
+            a.download = `Finanzas_Reporte.csv`;
             a.click();
         };
 
-        // Sincronización
+        // --- SINCRONIZACIÓN FIREBASE ---
         window.guardarFirebase = () => {
             set(ref(db, 'finanzas_master/estado'), state).then(() => alert('Datos guardados exitosamente.'));
             renderTodo();
@@ -494,8 +620,9 @@
             onValue(ref(db, 'finanzas_master/estado'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
-                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85 };
+                    state.config = data.config || { mes: "Actual", tasaUsd: 0.85, metaMensual: 0, ahorroMes: 0 };
                     state.cuentas = asegurarHistorial(data.cuentas);
+                    state.ingresos = asegurarHistorial(data.ingresos);
                     state.gastos = asegurarHistorial(data.gastos);
                     state.potes = asegurarHistorial(data.potes);
                     state.prestamos = asegurarHistorial(data.prestamos);
@@ -506,4 +633,3 @@
     </script>
 </body>
 </html>
-
