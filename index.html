@@ -66,8 +66,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script>
+        // Gestor de Instalación PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('btn-install');
+            if(installBtn) {
+                installBtn.style.display = 'inline-block';
+                installBtn.addEventListener('click', () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(() => {
+                        deferredPrompt = null;
+                        installBtn.style.display = 'none';
+                    });
+                });
+            }
+        });
+
         if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', (e)=> { });";
+            const swCode = `
+                self.addEventListener('install', (e) => self.skipWaiting());
+                self.addEventListener('activate', (e) => self.clients.claim());
+                self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => new Response('Offline'))); });
+            `;
             const blob = new Blob([swCode], { type: 'application/javascript' });
             const swUrl = URL.createObjectURL(blob);
             navigator.serviceWorker.register(swUrl).catch(()=>{});
@@ -88,6 +110,7 @@
         <header>
             <h3>D&L Control Maestro</h3>
             <div>
+                <button id="btn-install" class="btn-export" style="display:none; background: #ea580c; margin-right: 10px;">📲 Instalar App</button>
                 <button class="btn-export" onclick="window.exportarExcel()">📥 Bajar Excel</button>
                 <span id="header-mes" style="margin-left: 15px; font-weight:bold;"></span>
             </div>
@@ -148,7 +171,7 @@
                         <table>
                             <thead><tr><th>Descripción</th><th>Moneda</th><th>Ingreso Base</th><th>Recibido</th><th>Falta Recibir</th><th>Eq. Euros (Base)</th><th>Acciones</th></tr></thead>
                             <tbody id="body-ingresos"></tbody>
-                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Ingresos:</td><td id="sub-ingresos" style="font-weight:bold; color:var(--s);">0.00 €</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Sub-Totales:</td><td id="tot-ingresos-falta" style="font-weight:bold; color:var(--w);">0.00 €</td><td id="sub-ingresos" style="font-weight:bold; color:var(--s);">0.00 €</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('ingresos')">+ Nuevo Ingreso</button>
@@ -160,7 +183,7 @@
                         <table>
                             <thead><tr><th>Descripción</th><th>Moneda</th><th>Costo Base</th><th>Pagado</th><th>Falta Pagar</th><th>Eq. Euros (Base)</th><th>% Ingreso</th><th>Acciones</th></tr></thead>
                             <tbody id="body-gastos"></tbody>
-                            <tfoot><tr><td colspan="5" style="text-align:right; font-weight:bold;">Sub-Total Gastos:</td><td id="sub-gastos" style="font-weight:bold; color:var(--d);">0.00 €</td><td id="sub-porcentaje" style="font-weight:bold; color:#64748b;">0%</td><td></td></tr></tfoot>
+                            <tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Sub-Totales:</td><td id="tot-gastos-falta" style="font-weight:bold; color:var(--d);">0.00 €</td><td id="sub-gastos" style="font-weight:bold; color:var(--d);">0.00 €</td><td id="sub-porcentaje" style="font-weight:bold; color:#64748b;">0%</td><td></td></tr></tfoot>
                         </table>
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('gastos')">+ Nuevo Gasto</button>
@@ -523,7 +546,7 @@
             document.getElementById('in-meta').value = state.config.metaMensual;
             document.getElementById('in-ahorro').value = state.config.ahorroMes;
             
-            let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0;
+            let eqLiquidez = 0, eqPotes = 0, eqPorCobrar = 0, eqGastosPendientes = 0, eqIngresosPendientes = 0;
             let sumBaseIngresos = 0, sumBaseGastos = 0;
             let totCuentasSaldo = 0, totPotesSaldo = 0, totPreCobrado = 0, totPreFalta = 0, totVzlaEur = 0, totVzlaUsd = 0;
             
@@ -565,7 +588,10 @@
                         let eqEurResta = toEur(c.resta, item.moneda);
                         let tdPorcentaje = '';
                         
-                        if(cat === 'ingresos') sumBaseIngresos += eqEurBase;
+                        if(cat === 'ingresos') {
+                            sumBaseIngresos += eqEurBase;
+                            eqIngresosPendientes += eqEurResta;
+                        }
                         if(cat === 'gastos') {
                             sumBaseGastos += eqEurBase;
                             eqGastosPendientes += eqEurResta;
@@ -663,7 +689,7 @@
             // --- LÓGICA DE BALANCE AVANZADO ---
             const eqComprometidoTotal = eqPotes + eqGastosPendientes;
             const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
-            const netoMensual = sumBaseIngresos - sumBaseGastos;
+            const netoMensual = eqIngresosPendientes - eqGastosPendientes;
             const resultadoImportante = totalFinanzas + netoMensual;
             const diferencia = resultadoImportante - state.config.metaMensual;
 
@@ -685,6 +711,8 @@
             // Actualizar textos Compromisos Mensuales
             document.getElementById('sub-ingresos').innerText = fCur(sumBaseIngresos) + ' €';
             document.getElementById('sub-gastos').innerText = fCur(sumBaseGastos) + ' €';
+            if(document.getElementById('tot-ingresos-falta')) document.getElementById('tot-ingresos-falta').innerText = fCur(eqIngresosPendientes) + ' €';
+            if(document.getElementById('tot-gastos-falta')) document.getElementById('tot-gastos-falta').innerText = fCur(eqGastosPendientes) + ' €';
             let totPerc = sumBaseIngresos > 0 ? ((sumBaseGastos / sumBaseIngresos) * 100).toFixed(1) : 0;
             if(document.getElementById('sub-porcentaje')) document.getElementById('sub-porcentaje').innerText = totPerc + '%';
             
@@ -898,11 +926,11 @@
                     } else if (cat === 'ingresos') {
                         head = [['Descripción', 'Moneda', 'Base', 'Recibido', 'Falta', 'Eq. Euros', 'Historial (Movimientos)']];
                         body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEur) + ' €', movsText]);
-                        totBaseEur += eqEur;
+                        totBaseEur += eqEur; totFalta += eqEurResta;
                     } else if (cat === 'gastos') {
                         head = [['Descripción', 'Moneda', 'Base', 'Pagado', 'Falta', 'Eq. Euros', 'Historial (Movimientos)']];
                         body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEur) + ' €', movsText]);
-                        totBaseEur += eqEur;
+                        totBaseEur += eqEur; totFalta += eqEurResta;
                     } else if (cat === 'prestamos') {
                         head = [['Deudor', 'Moneda', 'Inicial', 'Cobrado', 'Falta', 'Eq. Euros (Falta)', 'Historial (Movimientos)']];
                         body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEurResta) + ' €', movsText]);
@@ -916,7 +944,7 @@
                 });
 
                 if(cat === 'cuentas' || cat === 'potes') foot = [['Totales:', '', '', fCur(totSaldo), fCur(totEqEur) + ' €', '']];
-                if(cat === 'ingresos' || cat === 'gastos') foot = [['Sub-Total:', '', '', '', '', fCur(totBaseEur) + ' €', '']];
+                if(cat === 'ingresos' || cat === 'gastos') foot = [['Sub-Totales:', '', '', '', fCur(totFalta) + ' €', fCur(totBaseEur) + ' €', '']];
                 if(cat === 'prestamos') foot = [['Totales:', '', '', fCur(totEjecutado), fCur(totFalta), fCur(totEqEur) + ' €', '']];
                 if(cat === 'venezuela') foot = [['Totales:', '', fCur(totSaldo) + ' €', '$ ' + fCur(totEqUsd), '']];
                 
