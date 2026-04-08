@@ -206,9 +206,14 @@
                                 <tbody id="body-proyeccion"></tbody>
                                 <tfoot>
                                     <tr>
-                                        <td style="font-weight:bold; text-align:right;">Totales:</td>
+                                        <td style="font-weight:bold; text-align:right;">Total (Con Partida):</td>
                                         <td id="tot-proy-meta" style="font-weight:bold; color:var(--p);">0.00 €</td>
                                         <td id="tot-proy-alcanzado" style="font-weight:bold; color:var(--s);">0.00 €</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:bold; text-align:right;">Total (Puro Ahorro):</td>
+                                        <td id="tot-proy-meta-puro" style="font-weight:bold; color:var(--p);">0.00 €</td>
+                                        <td id="tot-proy-alcanzado-puro" style="font-weight:bold; color:var(--s);">0.00 €</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -712,13 +717,18 @@
             let capProy = parseFloat(state.config.capInicial) || 0;
             let totalAlcanzadoProy = capProy;
             let metaFinalProy = capProy + (parseFloat(state.config.ahorroMes) || 0) * 12;
+            let ahorroPuroAlcanzado = 0;
+            let ahorroPuroMeta = (parseFloat(state.config.ahorroMes) || 0) * 12;
             state.proyEstado = state.proyEstado || {};
             
             const mesesDelAno = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
             mesesDelAno.forEach(mes => {
                 capProy += (parseFloat(state.config.ahorroMes) || 0);
                 let isAlcanzado = state.proyEstado[mes] ? 'checked' : '';
-                if(state.proyEstado[mes]) totalAlcanzadoProy += (parseFloat(state.config.ahorroMes) || 0);
+                if(state.proyEstado[mes]) {
+                    totalAlcanzadoProy += (parseFloat(state.config.ahorroMes) || 0);
+                    ahorroPuroAlcanzado += (parseFloat(state.config.ahorroMes) || 0);
+                }
                 tbodyProy.innerHTML += `<tr>
                     <td>${mes}</td>
                     <td style="font-weight:bold; color:var(--a);">${fCur(capProy)} €</td>
@@ -727,6 +737,8 @@
             });
             document.getElementById('tot-proy-meta').innerText = fCur(metaFinalProy) + ' €';
             document.getElementById('tot-proy-alcanzado').innerText = fCur(totalAlcanzadoProy) + ' €';
+            if(document.getElementById('tot-proy-meta-puro')) document.getElementById('tot-proy-meta-puro').innerText = fCur(ahorroPuroMeta) + ' €';
+            if(document.getElementById('tot-proy-alcanzado-puro')) document.getElementById('tot-proy-alcanzado-puro').innerText = fCur(ahorroPuroAlcanzado) + ' €';
 
             // Render Proyección Vacaciones
             const tbodyVac = document.getElementById('body-vacaciones');
@@ -852,7 +864,8 @@
             y += 8;
             
             // 3. Tablas con Texto Vectorial
-            const addSection = (title, items) => {
+            const addSection = (title, cat) => {
+                const items = state[cat];
                 if (!items || items.length === 0) return;
                 
                 // Salto de página preventivo para el título si estamos al final de la hoja
@@ -862,31 +875,71 @@
                 doc.setTextColor(30, 41, 59);
                 doc.text(title, 14, y);
                 
-                const body = items.map(item => {
+                let head = [];
+                let body = [];
+                let foot = [];
+                
+                let totSaldo = 0, totEqEur = 0, totEqUsd = 0;
+                let totBaseEur = 0, totEjecutado = 0, totFalta = 0;
+
+                items.forEach(item => {
+                    const c = calcularSaldo(item, cat);
+                    let eqEur = toEur(c.saldo !== undefined ? c.saldo : c.total, item.moneda);
+                    let eqEurResta = c.resta !== undefined ? toEur(c.resta, item.moneda) : 0;
+                    
                     let movsText = (item.movs && item.movs.length > 0) 
-                        ? item.movs.map(m => `• ${m.fecha}: ${m.tipo} de ${m.monto} (${m.obs})`).join('\n') 
-                        : 'Sin movimientos registrados';
-                    return [item.nombre, `${item.base} ${item.moneda}`, movsText];
+                        ? item.movs.map(m => `• ${m.fecha}: ${m.tipo} ${m.monto} (${m.obs})`).join('\n') 
+                        : 'Sin movimientos';
+
+                    if(cat === 'cuentas' || cat === 'potes') {
+                        head = [['Nombre', 'Moneda', 'Inicial', 'Actual', 'Eq. Euros', 'Historial (Movimientos)']];
+                        body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.saldo), fCur(eqEur) + ' €', movsText]);
+                        totSaldo += c.saldo; totEqEur += eqEur;
+                    } else if (cat === 'ingresos') {
+                        head = [['Descripción', 'Moneda', 'Base', 'Recibido', 'Falta', 'Eq. Euros', 'Historial (Movimientos)']];
+                        body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEur) + ' €', movsText]);
+                        totBaseEur += eqEur;
+                    } else if (cat === 'gastos') {
+                        head = [['Descripción', 'Moneda', 'Base', 'Pagado', 'Falta', 'Eq. Euros', 'Historial (Movimientos)']];
+                        body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEur) + ' €', movsText]);
+                        totBaseEur += eqEur;
+                    } else if (cat === 'prestamos') {
+                        head = [['Deudor', 'Moneda', 'Inicial', 'Cobrado', 'Falta', 'Eq. Euros (Falta)', 'Historial (Movimientos)']];
+                        body.push([item.nombre, item.moneda, fCur(item.base), fCur(c.ejecutado), fCur(c.resta), fCur(eqEurResta) + ' €', movsText]);
+                        totEjecutado += c.ejecutado; totFalta += c.resta; totEqEur += eqEurResta;
+                    } else if (cat === 'venezuela') {
+                        let eqUsd = c.saldo / (state.config.tasaUsd || 1);
+                        head = [['Fondo', 'Inicial (€)', 'Actual (€)', 'Eq. USD ($)', 'Historial (Movimientos)']];
+                        body.push([item.nombre, fCur(item.base), fCur(c.saldo), '$ ' + fCur(eqUsd), movsText]);
+                        totSaldo += c.saldo; totEqUsd += eqUsd;
+                    }
                 });
+
+                if(cat === 'cuentas' || cat === 'potes') foot = [['Totales:', '', '', fCur(totSaldo), fCur(totEqEur) + ' €', '']];
+                if(cat === 'ingresos' || cat === 'gastos') foot = [['Sub-Total:', '', '', '', '', fCur(totBaseEur) + ' €', '']];
+                if(cat === 'prestamos') foot = [['Totales:', '', '', fCur(totEjecutado), fCur(totFalta), fCur(totEqEur) + ' €', '']];
+                if(cat === 'venezuela') foot = [['Totales:', '', fCur(totSaldo) + ' €', '$ ' + fCur(totEqUsd), '']];
                 
                 doc.autoTable({
                     startY: y + 4,
-                    head: [['Nombre', 'Monto Base', 'Historial (Movimientos)']],
+                    head: head,
                     body: body,
-                    styles: { fontSize: 9, cellPadding: 3 },
+                    foot: foot,
+                    styles: { fontSize: 8, cellPadding: 2 },
                     headStyles: { fillColor: [244, 246, 248], textColor: [30, 41, 59] },
-                    columnStyles: { 2: { cellWidth: 100 } },
+                    footStyles: { fillColor: [226, 232, 240], textColor: [30, 41, 59], fontStyle: 'bold' },
+                    columnStyles: { [head[0].length - 1]: { cellWidth: 70 } },
                     margin: { left: 14, right: 14 }
                 });
                 y = doc.lastAutoTable.finalY + 12; // Actualizar cursor después de la tabla
             };
 
-            addSection("Cuentas", state.cuentas);
-            addSection("Ingresos", state.ingresos);
-            addSection("Gastos", state.gastos);
-            addSection("Potes y Reservas", state.potes);
-            addSection("Préstamos Otorgados", state.prestamos);
-            addSection("Fondos Venezuela", state.venezuela);
+            addSection("Cuentas", "cuentas");
+            addSection("Ingresos", "ingresos");
+            addSection("Gastos", "gastos");
+            addSection("Potes y Reservas", "potes");
+            addSection("Préstamos Otorgados", "prestamos");
+            addSection("Fondos Venezuela", "venezuela");
             
             // 4. Guardado Local y en Base de Datos
             const pdfName = `Reporte_${tipo}_${state.config.mes}.pdf`;
