@@ -666,6 +666,8 @@
             // Actualizar textos Compromisos Mensuales
             document.getElementById('sub-ingresos').innerText = fCur(sumBaseIngresos) + ' €';
             document.getElementById('sub-gastos').innerText = fCur(sumBaseGastos) + ' €';
+            let totPerc = sumBaseIngresos > 0 ? ((sumBaseGastos / sumBaseIngresos) * 100).toFixed(1) : 0;
+            if(document.getElementById('sub-porcentaje')) document.getElementById('sub-porcentaje').innerText = totPerc + '%';
             
             document.getElementById('bal-finanzas').innerText = fCur(totalFinanzas) + ' €';
             document.getElementById('bal-neto').innerText = fCur(netoMensual) + ' €';
@@ -689,15 +691,59 @@
                 badgeDiferencia.style.background = "#e2e8f0"; badgeDiferencia.style.color = "var(--p)";
             }
 
-            // Render Proyección 1 Año
+            // Render Proyección General
             const tbodyProy = document.getElementById('body-proyeccion');
             tbodyProy.innerHTML = '';
-            let capProy = resultadoImportante;
-            for(let i=1; i<=12; i++) {
-                capProy += state.config.ahorroMes;
-                tbodyProy.innerHTML += `<tr><td>Mes +${i}</td><td style="font-weight:bold; color:var(--a);">${fCur(capProy)} €</td></tr>`;
+            document.getElementById('in-cap-inicial').value = state.config.capInicial || 0;
+            let capProy = parseFloat(state.config.capInicial) || 0;
+            let totalAlcanzadoProy = capProy;
+            let metaFinalProy = capProy + (parseFloat(state.config.ahorroMes) || 0) * 12;
+            state.proyEstado = state.proyEstado || {};
+            
+            const mesesDelAno = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            mesesDelAno.forEach(mes => {
+                capProy += (parseFloat(state.config.ahorroMes) || 0);
+                let isAlcanzado = state.proyEstado[mes] ? 'checked' : '';
+                if(state.proyEstado[mes]) totalAlcanzadoProy += (parseFloat(state.config.ahorroMes) || 0);
+                tbodyProy.innerHTML += `<tr>
+                    <td>${mes}</td>
+                    <td style="font-weight:bold; color:var(--a);">${fCur(capProy)} €</td>
+                    <td><input type="checkbox" ${isAlcanzado} onchange="window.toggleProy('${mes}', this.checked, 'proyEstado')" style="width:20px; height:20px;"></td>
+                </tr>`;
+            });
+            document.getElementById('tot-proy-meta').innerText = fCur(metaFinalProy) + ' €';
+            document.getElementById('tot-proy-alcanzado').innerText = fCur(totalAlcanzadoProy) + ' €';
+
+            // Render Proyección Vacaciones
+            const tbodyVac = document.getElementById('body-vacaciones');
+            if(tbodyVac) {
+                tbodyVac.innerHTML = '';
+                document.getElementById('in-cap-vac').value = state.config.capVacaciones || 0;
+                document.getElementById('in-ahorro-vac').value = state.config.ahorroVac || 0;
+                let capVac = parseFloat(state.config.capVacaciones) || 0;
+                let totalAlcanzadoVac = capVac;
+                let metaFinalVac = capVac + (parseFloat(state.config.ahorroVac) || 0) * 12;
+                state.vacEstado = state.vacEstado || {};
+                
+                mesesDelAno.forEach(mes => {
+                    capVac += (parseFloat(state.config.ahorroVac) || 0);
+                    let isAlcanzadoVac = state.vacEstado[mes] ? 'checked' : '';
+                    if(state.vacEstado[mes]) totalAlcanzadoVac += (parseFloat(state.config.ahorroVac) || 0);
+                    tbodyVac.innerHTML += `<tr>
+                        <td>${mes}</td>
+                        <td style="font-weight:bold; color:var(--a);">${fCur(capVac)} €</td>
+                        <td><input type="checkbox" ${isAlcanzadoVac} onchange="window.toggleProy('${mes}', this.checked, 'vacEstado')" style="width:20px; height:20px;"></td>
+                    </tr>`;
+                });
+                document.getElementById('tot-vac-meta').innerText = fCur(metaFinalVac) + ' €';
+                document.getElementById('tot-vac-alcanzado').innerText = fCur(totalAlcanzadoVac) + ' €';
             }
         }
+        
+        window.toggleProy = (mes, val, tipo) => { 
+            state[tipo][mes] = val; 
+            window.guardarFirebase(); 
+        };
 
         // --- MOSTRAR LISTA DE HISTÓRICOS ---
         window.cargarHistoricos = () => {
@@ -725,6 +771,31 @@
             });
         };
 
+        window.cargarParciales = () => {
+            onValue(ref(db, 'finanzas_master/parciales'), (snapshot) => {
+                const lista = document.getElementById('lista-parciales');
+                if(!lista) return;
+                const data = snapshot.val();
+                lista.innerHTML = '';
+                if(data) {
+                    // Ordenar de más reciente a más antiguo
+                    const keys = Object.keys(data).sort((a,b) => b - a);
+                    keys.forEach(k => {
+                        let item = data[k];
+                        lista.innerHTML += `
+                        <li style="padding: 10px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${item.mes} - ${item.fecha}</strong>
+                            <div>
+                                <a href="${item.pdf}" download="Parcial_${item.mes}_${k}.pdf" style="text-decoration:none; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:var(--p); color:white; margin-right:5px;">📄 Descargar Parcial</a>
+                            </div>
+                        </li>`;
+                    });
+                } else {
+                    lista.innerHTML = '<li><i>Aún no hay reportes parciales.</i></li>';
+                }
+            });
+        };
+
         // --- CIERRE DE MES Y EXPORTAR ---
         window.generarReportePDF = (tipo) => {
             const element = document.createElement('div');
@@ -732,11 +803,31 @@
             element.style.fontFamily = 'sans-serif';
             let html = `<h2 style="color:#1e293b;">Reporte de Balance ${tipo} - ${state.config.mes}</h2><p>Emitido el: ${new Date().toLocaleDateString()}</p><hr>`;
             
+            let eqLiq = document.getElementById('dash-liq').innerText;
+            let eqComp = document.getElementById('dash-comp').innerText;
+            let eqCobrar = document.getElementById('dash-cobrar').innerText;
+            let listaReal = document.getElementById('lista-real').innerHTML;
+            
+            html += `
+                <div style="background:#f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-top:0; color:#1e293b;">Resumen General (EL TODO)</h3>
+                    <table style="width:100%; text-align:left; font-size:14px; margin-bottom:10px;">
+                        <tr><th style="padding:4px;">Líquidez Total:</th><td style="color:#2563eb; font-weight:bold; padding:4px;">${eqLiq}</td></tr>
+                        <tr><th style="padding:4px;">Comprometido:</th><td style="color:#1e293b; font-weight:bold; padding:4px;">${eqComp}</td></tr>
+                        <tr><th style="padding:4px;">Por Cobrar:</th><td style="color:#64748b; font-weight:bold; padding:4px;">${eqCobrar}</td></tr>
+                    </table>
+                    <h4 style="margin-bottom:5px;">Contamos Realmente:</h4>
+                    <ul style="font-size:13px; list-style:none; padding:0;">
+                        ${listaReal.replace(/<li>/g, '<li style="margin-bottom:6px; border-bottom:1px solid #ddd; padding-bottom:6px;">')}
+                    </ul>
+                </div>
+            `;
+            
             const addSection = (title, items) => {
-                html += `<h3 style="margin-top:20px;">${title}</h3><table border="1" width="100%" style="border-collapse:collapse; margin-bottom: 15px; font-size:12px;"><tr><th style="padding:5px; background:#f4f6f8;">Nombre</th><th style="padding:5px; background:#f4f6f8;">Monto Base</th><th style="padding:5px; background:#f4f6f8;">Historial (Movimientos)</th></tr>`;
+                html += `<h3 style="margin-top:20px; page-break-inside: avoid;">${title}</h3><table border="1" width="100%" style="border-collapse:collapse; margin-bottom: 15px; font-size:12px; page-break-inside: auto;"><tr style="page-break-inside: avoid; page-break-after: auto;"><th style="padding:5px; background:#f4f6f8;">Nombre</th><th style="padding:5px; background:#f4f6f8;">Monto Base</th><th style="padding:5px; background:#f4f6f8;">Historial (Movimientos)</th></tr>`;
                 items.forEach(item => {
-                    let movsHtml = item.movs.map(m => `• ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>');
-                    html += `<tr><td style="padding:5px;">${item.nombre}</td><td style="padding:5px;">${item.base} ${item.moneda}</td><td style="padding:5px;">${movsHtml || 'Sin movimientos registrados'}</td></tr>`;
+                    let movsHtml = (item.movs && item.movs.length > 0) ? item.movs.map(m => `• ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>') : 'Sin movimientos registrados';
+                    html += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="padding:5px;">${item.nombre}</td><td style="padding:5px;">${item.base} ${item.moneda}</td><td style="padding:5px;">${movsHtml}</td></tr>`;
                 });
                 html += `</table>`;
             };
@@ -749,23 +840,28 @@
             addSection("Fondos Venezuela", state.venezuela);
             
             const opt = {
-                margin: 10,
+                margin: [15, 10, 15, 10],
                 filename: `Reporte_${tipo}_${state.config.mes}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
             
-            // Envolvemos el string HTML en un div con los estilos necesarios y lo pasamos directo.
-            // Esto soluciona de raíz el PDF en blanco causado por enviar un elemento DOM sin adjuntar.
-            const contenidoFinal = `<div style="padding: 20px; font-family: sans-serif;">${html}</div>`;
+            const contenidoFinal = `<div style="font-family: sans-serif;">${html}</div>`;
             
             if(tipo === 'Parcial') {
-                html2pdf().set(opt).from(contenidoFinal).save();
-            } else {
-                // Si es final, convertimos el PDF a Base64 y lo anidamos en la base de datos
                 html2pdf().set(opt).from(contenidoFinal).toPdf().get('pdf').then(function (pdf) {
-                    state.pdfArchivado = pdf.output('datauristring'); // Guardar Base64
+                    let b64 = pdf.output('datauristring');
+                    const refParcial = ref(db, `finanzas_master/parciales/${new Date().getTime()}`);
+                    set(refParcial, { fecha: new Date().toLocaleString(), mes: state.config.mes, pdf: b64 }).then(() => {
+                        window.cargarParciales();
+                    });
+                    html2pdf().set(opt).from(contenidoFinal).save();
+                });
+            } else {
+                html2pdf().set(opt).from(contenidoFinal).toPdf().get('pdf').then(function (pdf) {
+                    state.pdfArchivado = pdf.output('datauristring'); 
                     
                     html2pdf().set(opt).from(contenidoFinal).save().then(() => {
                         const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
@@ -850,6 +946,7 @@
                 }
             });
             window.cargarHistoricos(); // Llama a la lista visual de archivos guardados
+            window.cargarParciales(); // Carga la lista de pdfs parciales
         }
     </script>
 </body>
