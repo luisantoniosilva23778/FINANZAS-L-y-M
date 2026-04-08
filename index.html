@@ -848,28 +848,28 @@
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
             
-            const contenidoFinal = `<div style="font-family: sans-serif;">${html}</div>`;
+            // Creamos un elemento DOM real en memoria para asegurar que html2canvas lo lea correctamente
+            const elementToPrint = document.createElement('div');
+            elementToPrint.style.fontFamily = 'sans-serif';
+            elementToPrint.innerHTML = html;
             
+            // Ejecutamos html2pdf encadenando .save() a la misma instancia para no sobrecargar el renderizado
             if(tipo === 'Parcial') {
-                html2pdf().set(opt).from(contenidoFinal).toPdf().get('pdf').then(function (pdf) {
+                html2pdf().set(opt).from(elementToPrint).toPdf().get('pdf').then(function (pdf) {
                     let b64 = pdf.output('datauristring');
                     const refParcial = ref(db, `finanzas_master/parciales/${new Date().getTime()}`);
                     set(refParcial, { fecha: new Date().toLocaleString(), mes: state.config.mes, pdf: b64 }).then(() => {
                         window.cargarParciales();
                     });
-                    html2pdf().set(opt).from(contenidoFinal).save();
-                });
+                }).save();
             } else {
-                html2pdf().set(opt).from(contenidoFinal).toPdf().get('pdf').then(function (pdf) {
+                html2pdf().set(opt).from(elementToPrint).toPdf().get('pdf').then(function (pdf) {
                     state.pdfArchivado = pdf.output('datauristring'); 
-                    
-                    html2pdf().set(opt).from(contenidoFinal).save().then(() => {
-                        const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
-                        set(refHistorial, state).then(() => {
-                            window.cargarHistoricos();
-                        });
+                    const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
+                    set(refHistorial, state).then(() => {
+                        window.cargarHistoricos();
                     });
-                });
+                }).save();
             }
         };
 
