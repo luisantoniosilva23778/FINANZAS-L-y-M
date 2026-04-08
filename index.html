@@ -110,8 +110,10 @@
         <header>
             <h3>D&L Control Maestro</h3>
             <div>
+                <button class="btn-export" style="background: var(--s); margin-right: 10px;" onclick="window.guardarFirebase()">💾 Guardar Todo</button>
                 <button id="btn-install" class="btn-export" style="display:none; background: #ea580c; margin-right: 10px;">📲 Instalar App</button>
                 <button class="btn-export" onclick="window.exportarExcel()">📥 Bajar Excel</button>
+                <button class="btn-export" style="background: var(--d); margin-left: 10px;" onclick="window.salirApp()">🚪 Salir</button>
                 <span id="header-mes" style="margin-left: 15px; font-weight:bold;"></span>
             </div>
         </header>
@@ -398,13 +400,50 @@
         };
         let activeModal = { tipoCat: null, index: null };
 
+        // --- CONTROL DE SESIÓN (30 MIN INACTIVIDAD) ---
+        const verificarSesion = () => {
+            const expira = localStorage.getItem('sesion_expira');
+            if (localStorage.getItem('sesion_activa') === 'true') {
+                if (expira && Date.now() > parseInt(expira)) {
+                    localStorage.removeItem('sesion_activa');
+                    localStorage.removeItem('sesion_expira');
+                } else {
+                    window.login(true); // Auto-login silencioso
+                }
+            }
+        };
+        // Renovar los 30 minutos con cualquier interacción del usuario
+        ['click', 'touchstart', 'mousemove', 'keydown'].forEach(evt => 
+            window.addEventListener(evt, () => {
+                if(localStorage.getItem('sesion_activa') === 'true') {
+                    localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
+                }
+            })
+        );
+        verificarSesion(); // Ejecutar al cargar la página
+
         // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
-        window.login = () => {
-            if(document.getElementById('pass').value === '1234') {
+        window.login = (esAutoLogin = false) => {
+            if(document.getElementById('pass').value === '1234' || esAutoLogin) {
+                localStorage.setItem('sesion_activa', 'true');
+                localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
                 cargarFirebase();
-            } else { alert('Contraseña incorrecta'); }
+            } else { 
+                alert('Contraseña incorrecta'); 
+            }
+        };
+
+        window.salirApp = () => {
+            if(confirm("¿Deseas guardar todos los cambios antes de salir?")) {
+                window.guardarFirebase();
+            }
+            localStorage.removeItem('sesion_activa');
+            localStorage.removeItem('sesion_expira');
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('pass').value = '';
         };
 
         window.showTab = (id) => {
