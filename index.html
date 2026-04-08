@@ -402,6 +402,27 @@
         };
         let activeModal = { tipoCat: null, index: null };
 
+        // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
+        window.login = (esAutoLogin = false) => {
+            if(document.getElementById('pass').value.trim() === '1234' || esAutoLogin === true) {
+                try {
+                    localStorage.setItem('sesion_activa', 'true');
+                    localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
+                } catch(e) { 
+                    console.warn('Almacenamiento local bloqueado (ej. Modo Incógnito), pero se permite el acceso.'); 
+                }
+                
+                // Ocultar el teclado virtual del móvil
+                document.getElementById('pass').blur();
+                
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                cargarFirebase();
+            } else { 
+                alert('Contraseña incorrecta'); 
+            }
+        };
+
         // --- CONTROL DE SESIÓN (30 MIN INACTIVIDAD) ---
         const verificarSesion = () => {
             const expira = localStorage.getItem('sesion_expira');
@@ -423,27 +444,6 @@
             })
         );
         verificarSesion(); // Ejecutar al cargar la página
-
-        // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
-        window.login = (esAutoLogin = false) => {
-            if(document.getElementById('pass').value.trim() === '1234' || esAutoLogin === true) {
-                try {
-                    localStorage.setItem('sesion_activa', 'true');
-                    localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
-                } catch(e) { 
-                    console.warn('Almacenamiento local bloqueado (ej. Modo Incógnito), pero se permite el acceso.'); 
-                }
-                
-                // Ocultar el teclado virtual del móvil
-                document.getElementById('pass').blur();
-                
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                cargarFirebase();
-            } else { 
-                alert('Contraseña incorrecta'); 
-            }
-        };
 
         window.salirApp = () => {
             if(confirm("¿Deseas guardar todos los cambios antes de salir?")) {
