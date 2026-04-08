@@ -101,8 +101,10 @@
     <div id="login-screen">
         <div class="card" style="width: 320px; text-align: center;">
             <h2 style="margin-bottom: 15px; color: var(--p);">Acceso PRO</h2>
-            <input type="password" id="pass" placeholder="Contraseña" style="margin-bottom: 15px; text-align: center;">
-            <button class="btn btn-save-main" style="margin-top:0;" onclick="window.login()">Ingresar</button>
+            <form onsubmit="event.preventDefault(); window.login();">
+                <input type="password" id="pass" placeholder="Contraseña" style="margin-bottom: 15px; text-align: center;">
+                <button type="submit" class="btn btn-save-main" style="margin-top:0;">Ingresar</button>
+            </form>
         </div>
     </div>
 
@@ -425,8 +427,16 @@
         // --- MANEJO DE NAVEGACIÓN Y LOGIN ---
         window.login = (esAutoLogin = false) => {
             if(document.getElementById('pass').value.trim() === '1234' || esAutoLogin === true) {
-                localStorage.setItem('sesion_activa', 'true');
-                localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
+                try {
+                    localStorage.setItem('sesion_activa', 'true');
+                    localStorage.setItem('sesion_expira', Date.now() + (30 * 60 * 1000));
+                } catch(e) { 
+                    console.warn('Almacenamiento local bloqueado (ej. Modo Incógnito), pero se permite el acceso.'); 
+                }
+                
+                // Ocultar el teclado virtual del móvil
+                document.getElementById('pass').blur();
+                
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
                 cargarFirebase();
