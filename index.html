@@ -219,6 +219,13 @@
                         <li><i>Cargando registros históricos...</i></li>
                     </ul>
                 </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="color: #2563eb;">Historial de Reportes Parciales</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 10px;">Aquí puedes ver los cierres parciales emitidos durante el mes.</p>
+                    <ul id="lista-parciales" style="list-style: none; padding: 0;">
+                        <li><i>Cargando reportes parciales...</i></li>
+                    </ul>
+                </div>
             </section>
 
             <section id="potes" class="tab-content">
@@ -233,6 +240,32 @@
                     </div>
                     <button class="btn btn-add" onclick="window.agregarItem('potes')">+ Nuevo Pote</button>
                     <button class="btn btn-save-main" onclick="window.guardarFirebase()">Guardar Cambios</button>
+                </div>
+                <div class="card">
+                    <h3>Meta de Ahorro: Vacaciones (1 Año)</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex:1;">
+                            <label style="font-weight:bold;">Monto de partida (€):</label>
+                            <input type="number" id="in-cap-vac" onchange="window.actualizarConfig('capVacaciones', this.value)" placeholder="Ej: 500">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-weight:bold;">Ahorro mensual (€):</label>
+                            <input type="number" id="in-ahorro-vac" onchange="window.actualizarConfig('ahorroVac', this.value)" placeholder="Ej: 100">
+                        </div>
+                    </div>
+                    <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
+                        <table>
+                            <thead><tr><th>Mes</th><th>Meta Acumulada</th><th>¿Alcanzado?</th></tr></thead>
+                            <tbody id="body-vacaciones"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td style="font-weight:bold; text-align:right;">Totales:</td>
+                                    <td id="tot-vac-meta" style="font-weight:bold; color:var(--p);">0.00 €</td>
+                                    <td id="tot-vac-alcanzado" style="font-weight:bold; color:var(--s);">0.00 €</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </section>
 
@@ -511,12 +544,15 @@
                         // Flujo: Ingresos y Gastos
                         let eqEurBase = toEur(c.total, item.moneda); // Calculamos la "Base" en euros para el Neto
                         let eqEurResta = toEur(c.resta, item.moneda);
+                        let tdPorcentaje = '';
                         
                         if(cat === 'ingresos') sumBaseIngresos += eqEurBase;
                         if(cat === 'gastos') {
                             sumBaseGastos += eqEurBase;
                             eqGastosPendientes += eqEurResta;
                             if(eqEurResta > 0) htmlComp += `<li><span style="color:var(--d)">Falta Pagar: ${item.nombre||'Gasto'}</span> <strong>${fCur(eqEurResta)} €</strong></li>`;
+                            let perc = sumBaseIngresos > 0 ? ((eqEurBase / sumBaseIngresos) * 100).toFixed(1) : 0;
+                            tdPorcentaje = `<td style="font-weight:bold; color:#64748b;">${perc}%</td>`;
                         }
 
                         tbody.innerHTML += `
@@ -527,6 +563,7 @@
                                 <td><span style="color:${cat==='ingresos'?'var(--s)':'var(--s)'};">${fCur(c.ejecutado)}</span></td>
                                 <td style="color:${cat==='ingresos'?'var(--w)':'var(--d)'}; font-weight:bold;">${fCur(c.resta)}</td>
                                 <td style="color:var(--a); font-weight:bold;">${fCur(eqEurBase)} €</td>
+                                ${tdPorcentaje}
                                 <td>
                                     <button class="btn btn-action" onclick="window.abrirModal('${cat}', ${i})">Historial</button>
                                     <button class="btn btn-del" onclick="window.eliminarItem('${cat}', ${i})">X</button>
