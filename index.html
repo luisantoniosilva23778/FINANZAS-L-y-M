@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Finanzas D&L PRO","short_name":"Finanzas PRO","start_url":".","display":"standalone","background_color":"#1e293b","theme_color":"#1e293b","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
     <title>Finanzas D&L - Control Maestro PRO</title>
     <style>
         :root { --bg: #f4f6f8; --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --card: #fff; --border: #e2e8f0; --w: #f59e0b; }
@@ -58,7 +63,16 @@
         
         #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--p); position: fixed; inset: 0; z-index: 2000; }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            const swCode = "self.addEventListener('fetch', (e)=> { });";
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(()=>{});
+        }
+    </script>
 </head>
 <body>
 
@@ -798,38 +812,73 @@
 
         // --- CIERRE DE MES Y EXPORTAR ---
         window.generarReportePDF = (tipo) => {
-            const element = document.createElement('div');
-            element.style.padding = '20px';
-            element.style.fontFamily = 'sans-serif';
-            let html = `<h2 style="color:#1e293b;">Reporte de Balance ${tipo} - ${state.config.mes}</h2><p>Emitido el: ${new Date().toLocaleDateString()}</p><hr>`;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
             
+            // 1. Cabecera
+            doc.setFontSize(16);
+            doc.setTextColor(30, 41, 59);
+            doc.text(`Reporte de Balance ${tipo} - ${state.config.mes}`, 14, 20);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Emitido el: ${new Date().toLocaleDateString()}`, 14, 26);
+            
+            let y = 38; // Posición de escritura (Cursor Y)
+            
+            // 2. Resumen General (Extrayendo texto de la interfaz)
             let eqLiq = document.getElementById('dash-liq').innerText;
             let eqComp = document.getElementById('dash-comp').innerText;
             let eqCobrar = document.getElementById('dash-cobrar').innerText;
-            let listaReal = document.getElementById('lista-real').innerHTML;
+
+            doc.setFontSize(12);
+            doc.setTextColor(30, 41, 59);
+            doc.text("Resumen General (EL TODO)", 14, y); y += 7;
             
-            html += `
-                <div style="background:#f4f6f8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="margin-top:0; color:#1e293b;">Resumen General (EL TODO)</h3>
-                    <table style="width:100%; text-align:left; font-size:14px; margin-bottom:10px;">
-                        <tr><th style="padding:4px;">Líquidez Total:</th><td style="color:#2563eb; font-weight:bold; padding:4px;">${eqLiq}</td></tr>
-                        <tr><th style="padding:4px;">Comprometido:</th><td style="color:#1e293b; font-weight:bold; padding:4px;">${eqComp}</td></tr>
-                        <tr><th style="padding:4px;">Por Cobrar:</th><td style="color:#64748b; font-weight:bold; padding:4px;">${eqCobrar}</td></tr>
-                    </table>
-                    <h4 style="margin-bottom:5px;">Contamos Realmente:</h4>
-                    <ul style="font-size:13px; list-style:none; padding:0;">
-                        ${listaReal.replace(/<li>/g, '<li style="margin-bottom:6px; border-bottom:1px solid #ddd; padding-bottom:6px;">')}
-                    </ul>
-                </div>
-            `;
+            doc.setFontSize(10);
+            doc.text(`Líquidez Total: ${eqLiq}`, 14, y); y += 6;
+            doc.text(`Comprometido: ${eqComp}`, 14, y); y += 6;
+            doc.text(`Por Cobrar: ${eqCobrar}`, 14, y); y += 8;
             
+            doc.setFontSize(11);
+            doc.text("Contamos Realmente:", 14, y); y += 6;
+            doc.setFontSize(10);
+            
+            document.querySelectorAll('#lista-real li').forEach(node => {
+                let textoLimpio = node.innerText.replace(/\n/g, ' ');
+                doc.text(`• ${textoLimpio}`, 14, y);
+                y += 5;
+            });
+            y += 8;
+            
+            // 3. Tablas con Texto Vectorial
             const addSection = (title, items) => {
-                html += `<h3 style="margin-top:20px; page-break-inside: avoid;">${title}</h3><table border="1" width="100%" style="border-collapse:collapse; margin-bottom: 15px; font-size:12px; page-break-inside: auto;"><tr style="page-break-inside: avoid; page-break-after: auto;"><th style="padding:5px; background:#f4f6f8;">Nombre</th><th style="padding:5px; background:#f4f6f8;">Monto Base</th><th style="padding:5px; background:#f4f6f8;">Historial (Movimientos)</th></tr>`;
-                items.forEach(item => {
-                    let movsHtml = (item.movs && item.movs.length > 0) ? item.movs.map(m => `• ${m.fecha}: <strong style="color:#2563eb">${m.tipo}</strong> de ${m.monto} (${m.obs})`).join('<br>') : 'Sin movimientos registrados';
-                    html += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="padding:5px;">${item.nombre}</td><td style="padding:5px;">${item.base} ${item.moneda}</td><td style="padding:5px;">${movsHtml}</td></tr>`;
+                if (!items || items.length === 0) return;
+                
+                // Salto de página preventivo para el título si estamos al final de la hoja
+                if (y > 260) { doc.addPage(); y = 20; }
+                
+                doc.setFontSize(12);
+                doc.setTextColor(30, 41, 59);
+                doc.text(title, 14, y);
+                
+                const body = items.map(item => {
+                    let movsText = (item.movs && item.movs.length > 0) 
+                        ? item.movs.map(m => `• ${m.fecha}: ${m.tipo} de ${m.monto} (${m.obs})`).join('\n') 
+                        : 'Sin movimientos registrados';
+                    return [item.nombre, `${item.base} ${item.moneda}`, movsText];
                 });
-                html += `</table>`;
+                
+                doc.autoTable({
+                    startY: y + 4,
+                    head: [['Nombre', 'Monto Base', 'Historial (Movimientos)']],
+                    body: body,
+                    styles: { fontSize: 9, cellPadding: 3 },
+                    headStyles: { fillColor: [244, 246, 248], textColor: [30, 41, 59] },
+                    columnStyles: { 2: { cellWidth: 100 } },
+                    margin: { left: 14, right: 14 }
+                });
+                y = doc.lastAutoTable.finalY + 12; // Actualizar cursor después de la tabla
             };
 
             addSection("Cuentas", state.cuentas);
@@ -839,37 +888,23 @@
             addSection("Préstamos Otorgados", state.prestamos);
             addSection("Fondos Venezuela", state.venezuela);
             
-            const opt = {
-                margin: [15, 10, 15, 10],
-                filename: `Reporte_${tipo}_${state.config.mes}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
+            // 4. Guardado Local y en Base de Datos
+            const pdfName = `Reporte_${tipo}_${state.config.mes}.pdf`;
+            const b64 = doc.output('datauristring');
             
-            // Creamos un elemento DOM real en memoria para asegurar que html2canvas lo lea correctamente
-            const elementToPrint = document.createElement('div');
-            elementToPrint.style.fontFamily = 'sans-serif';
-            elementToPrint.innerHTML = html;
-            
-            // Ejecutamos html2pdf encadenando .save() a la misma instancia para no sobrecargar el renderizado
             if(tipo === 'Parcial') {
-                html2pdf().set(opt).from(elementToPrint).toPdf().get('pdf').then(function (pdf) {
-                    let b64 = pdf.output('datauristring');
-                    const refParcial = ref(db, `finanzas_master/parciales/${new Date().getTime()}`);
-                    set(refParcial, { fecha: new Date().toLocaleString(), mes: state.config.mes, pdf: b64 }).then(() => {
-                        window.cargarParciales();
-                    });
-                }).save();
+                doc.save(pdfName);
+                const refParcial = ref(db, `finanzas_master/parciales/${new Date().getTime()}`);
+                set(refParcial, { fecha: new Date().toLocaleString(), mes: state.config.mes, pdf: b64 }).then(() => {
+                    window.cargarParciales();
+                });
             } else {
-                html2pdf().set(opt).from(elementToPrint).toPdf().get('pdf').then(function (pdf) {
-                    state.pdfArchivado = pdf.output('datauristring'); 
-                    const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
-                    set(refHistorial, state).then(() => {
-                        window.cargarHistoricos();
-                    });
-                }).save();
+                doc.save(pdfName);
+                state.pdfArchivado = b64; 
+                const refHistorial = ref(db, `finanzas_master/historico/${state.config.mes}`);
+                set(refHistorial, state).then(() => {
+                    window.cargarHistoricos();
+                });
             }
         };
 
