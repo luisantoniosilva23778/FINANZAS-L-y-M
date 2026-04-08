@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Finanzas D&L PRO","short_name":"Finanzas PRO","start_url":".","display":"standalone","background_color":"#1e293b","theme_color":"#1e293b","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Finanzas%20D%26L%20PRO%22%2C%22short_name%22%3A%22Finanzas%20PRO%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231e293b%22%2C%22theme_color%22%3A%22%231e293b%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F3135%2F3135715.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
     <title>Finanzas D&L - Control Maestro PRO</title>
     <style>
         :root { --bg: #f4f6f8; --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --card: #fff; --border: #e2e8f0; --w: #f59e0b; }
@@ -443,7 +443,6 @@
                 }
             })
         );
-        verificarSesion(); // Ejecutar al cargar la página
 
         window.salirApp = () => {
             if(confirm("¿Deseas guardar todos los cambios antes de salir?")) {
@@ -1113,6 +1112,9 @@
             window.cargarHistoricos(); // Llama a la lista visual de archivos guardados
             window.cargarParciales(); // Carga la lista de pdfs parciales
         }
+
+        // Ejecutar al cargar la página (después de que todas las funciones hayan sido declaradas)
+        verificarSesion(); 
     </script>
 </body>
 </html>
