@@ -138,7 +138,7 @@
                         <ul class="stat-list" id="lista-liq"></ul>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-header bg-dark"><p>Comprometido (Potes + Gastos)</p><h2 id="dash-comp">0.00 €</h2></div>
+                        <div class="stat-header bg-dark"><p>Comprometido (Potes + Vzla + Gastos)</p><h2 id="dash-comp">0.00 €</h2></div>
                         <ul class="stat-list" id="lista-comp"></ul>
                     </div>
                     <div class="stat-box">
@@ -197,7 +197,7 @@
                     <div class="card">
                         <h3>3. Balance del Mes y Meta</h3>
                         <div class="analisis-caja">
-                            <div class="analisis-fila"><span>Total Finanzas (Liq + Cobrar - Potes):</span> <strong id="bal-finanzas">0.00 €</strong></div>
+                            <div class="analisis-fila"><span>Total Finanzas (Liq + Cobrar - Potes - Vzla):</span> <strong id="bal-finanzas">0.00 €</strong></div>
                             <div class="analisis-fila"><span>Neto del Mes (Ingresos - Gastos):</span> <strong id="bal-neto">0.00 €</strong></div>
                             <div class="analisis-fila bold-res"><span>Resultado Importante:</span> <strong id="bal-resultado">0.00 €</strong></div>
                         </div>
@@ -701,6 +701,7 @@
                     let eqUsd = c.saldo / (state.config.tasaUsd || 1);
                     totVzlaEur += c.saldo;
                     totVzlaUsd += eqUsd;
+                    htmlComp += `<li><span>Vzla: ${item.nombre||'Fondo'}</span> <strong>${fCur(c.saldo)} €</strong></li>`;
                     tbodyVzla.innerHTML += `
                         <tr>
                             <td><input type="text" value="${item.nombre}" placeholder="Ej: Danyela" onchange="window.actualizarCampo('venezuela', ${i}, 'nombre', this.value)"></td>
@@ -735,8 +736,8 @@
             }
 
             // --- LÓGICA DE BALANCE AVANZADO ---
-            const eqComprometidoTotal = eqPotes + eqGastosPendientes;
-            const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes;
+            const eqComprometidoTotal = eqPotes + totVzlaEur + eqGastosPendientes;
+            const totalFinanzas = eqLiquidez + eqPorCobrar - eqPotes - totVzlaEur;
             const netoMensual = eqIngresosPendientes - eqGastosPendientes;
             const resultadoImportante = totalFinanzas + netoMensual;
             const diferencia = resultadoImportante - state.config.metaMensual;
@@ -746,8 +747,8 @@
             document.getElementById('dash-comp').innerText = fCur(eqComprometidoTotal) + ' €';
             document.getElementById('dash-cobrar').innerText = fCur(eqPorCobrar) + ' €';
             document.getElementById('lista-real').innerHTML = `
-                <li><span>Liq - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez - eqComprometidoTotal)} €</strong></li>
-                <li><span>Liq + Cobrar - (Potes+Gastos):</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqComprometidoTotal)} €</strong></li>
+                <li><span>Liq - (Potes+Vzla+Gastos):</span> <strong>${fCur(eqLiquidez - eqComprometidoTotal)} €</strong></li>
+                <li><span>Liq + Cobrar - (Potes+Vzla+Gastos):</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqComprometidoTotal)} €</strong></li>
                 <li><span>Liq - Gastos:</span> <strong>${fCur(eqLiquidez - eqGastosPendientes)} €</strong></li>
                 <li><span>Liq + Cobrar - Gastos:</span> <strong>${fCur(eqLiquidez + eqPorCobrar - eqGastosPendientes)} €</strong></li>
             `;
