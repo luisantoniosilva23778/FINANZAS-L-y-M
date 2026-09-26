@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -11,57 +11,252 @@
     <title>Finanzas D&L - Control Maestro PRO</title>
     <style>
         :root { --bg: #f4f6f8; --p: #1e293b; --a: #2563eb; --s: #10b981; --d: #ef4444; --card: #fff; --border: #e2e8f0; --w: #f59e0b; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #334155; padding-bottom: 50px; }
-        
-        header { background: var(--p); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        nav { display: flex; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-weight: bold; color: #64748b; cursor: pointer; min-width: 120px; border-bottom: 3px solid transparent; }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            background: var(--bg);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: #334155;
+            padding-bottom: calc(50px + env(safe-area-inset-bottom, 0px));
+            min-height: 100vh;
+            min-height: 100dvh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior-y: none;
+        }
+
+        button, input, select, textarea {
+            font: inherit;
+        }
+
+        button {
+            -webkit-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        input, select, textarea {
+            background-color: #fff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px;
+            width: 100%;
+            min-height: 36px;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--a);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--a);
+        }
+
+        header {
+            background: var(--p);
+            color: white;
+            padding: calc(15px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 15px max(20px, env(safe-area-inset-left, 0px));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header > div {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        nav {
+            display: flex;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        nav::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            font-weight: bold;
+            color: #64748b;
+            cursor: pointer;
+            min-width: 120px;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
         .tab-btn.active { color: var(--a); border-bottom-color: var(--a); }
-        
-        main { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 max(15px, env(safe-area-inset-right, 0px)) 0 max(15px, env(safe-area-inset-left, 0px));
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
+
         .card { background: var(--card); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .card h3 { color: var(--p); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        
+
         .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-        
+
         .stat-box { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: white; }
         .stat-header { padding: 20px; color: white; text-align: center; }
         .stat-header h2 { font-size: 1.8rem; margin-top: 10px; }
-        .stat-list { padding: 15px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; }
-        .stat-list li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #e2e8f0; }
-        
+        .stat-list { padding: 15px; max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 0.9rem; }
+        .stat-list li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px dashed #e2e8f0; }
+
         .bg-blue { background: var(--a); } .bg-green { background: var(--s); } .bg-dark { background: var(--p); } .bg-gray { background: #64748b; } .bg-warn { background: var(--w); }
 
-        .table-wrap { overflow-x: auto; }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 10px; }
-        th { background: #f8fafc; padding: 10px; text-align: left; border-bottom: 2px solid var(--border); }
+        th { background: #f8fafc; padding: 10px; text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap; }
         td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        input, select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; }
-        
+
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: #e2e8f0; }
         .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
         .btn-add { background: var(--p); width: 100%; margin-top: 10px; padding: 12px; }
         .btn-action { background: var(--a); font-size: 0.8rem; }
         .btn-del { background: var(--d); font-size: 0.8rem; }
         .btn-save-main { background: var(--s); font-size: 1.1rem; padding: 15px; width: 100%; margin-top: 20px; }
-        .btn-export { background: #047857; color: white; padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-export { background: #047857; color: white; padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; white-space: nowrap; }
 
         .analisis-caja { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .analisis-fila { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; }
+        .analisis-fila { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 1rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; }
         .bold-res { font-weight: bold; font-size: 1.1rem; color: var(--p); }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 8px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+        }
+        .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 8px; padding: 20px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .close-modal { background: var(--d); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; }
-        
-        #login-screen { display: flex; height: 100vh; align-items: center; justify-content: center; background: var(--p); position: fixed; inset: 0; z-index: 2000; }
+
+        #login-screen {
+            display: flex;
+            min-height: 100vh;
+            min-height: 100dvh;
+            align-items: center;
+            justify-content: center;
+            background: var(--p);
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                padding-top: calc(12px + env(safe-area-inset-top, 0px));
+                padding-bottom: 12px;
+            }
+
+            header > h3 {
+                text-align: center;
+                font-size: 1.05rem;
+            }
+
+            header > div {
+                justify-content: center;
+                gap: 6px;
+            }
+
+            header .btn-export {
+                margin: 0 !important;
+                padding: 9px 10px;
+                font-size: 0.82rem;
+                flex: 1 1 calc(50% - 6px);
+            }
+
+            #header-mes {
+                flex: 1 0 100%;
+                margin: 4px 0 0 !important;
+                text-align: center;
+                font-size: 0.9rem;
+            }
+
+            .tab-btn {
+                flex: 0 0 auto;
+                min-width: 105px;
+                padding: 12px 14px;
+                font-size: 0.82rem;
+            }
+
+            main {
+                margin: 12px auto;
+                padding-left: max(10px, env(safe-area-inset-left, 0px));
+                padding-right: max(10px, env(safe-area-inset-right, 0px));
+            }
+
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            input, select, textarea {
+                font-size: 16px; /* evita el zoom automático de Safari al enfocar */
+            }
+
+            table { font-size: 0.85rem; }
+            th { padding: 8px; }
+            td { padding: 7px; }
+
+            .modal-content {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .analisis-fila {
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 430px) {
+            header .btn-export {
+                flex-basis: 100%;
+            }
+
+            .stat-header h2 {
+                font-size: 1.55rem;
+            }
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
