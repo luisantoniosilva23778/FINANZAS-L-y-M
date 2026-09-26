@@ -12,7 +12,7 @@
             if (isiOS) {
                 document.getElementById('app-viewport').setAttribute(
                     'content',
-                    'width=1200, viewport-fit=cover'
+                    'width=1000, viewport-fit=cover'
                 );
                 document.documentElement.classList.add('ios-compact');
             }
@@ -123,7 +123,7 @@
         .tab-btn.active { color: var(--a); border-bottom-color: var(--a); }
 
         main {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 20px auto;
             padding: 0 max(15px, env(safe-area-inset-right, 0px)) 0 max(15px, env(safe-area-inset-left, 0px));
         }
@@ -192,7 +192,7 @@
          * RESPONSIVE COMPACTO
          * -------------------
          * No apilamos automáticamente tarjetas, paneles ni botones en móviles.
-         * En iOS el viewport virtual de 1000px de arriba mantiene una densidad
+         * En iOS el viewport virtual compacto de arriba mantiene una densidad
          * visual en todos los módulos, no solo en "EL TODO".
          */
         @media (max-width: 520px) {
@@ -271,11 +271,11 @@
         }
 
         html.ios-compact {
-            min-width: 1200px;
+            min-width: 1000px;
         }
 
         html.ios-compact body {
-            min-width: 1200px;
+            min-width: 1000px;
         }
 
         html.ios-compact input,
@@ -330,15 +330,15 @@
             min-width: 0;
             width: calc(100% / 7);
             padding: 9px 3px;
-            font-size: 0.61rem;
-            line-height: 1.1;
+            font-size: 0.70rem;
+            line-height: 1.12;
             white-space: normal;
             overflow-wrap: anywhere;
             text-align: center;
         }
 
         html.ios-compact main {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 12px auto;
             padding: 0 10px;
         }
@@ -361,16 +361,16 @@
             width: 100%;
             max-width: 100%;
             table-layout: fixed;
-            font-size: 0.66rem;
+            font-size: 0.76rem;
         }
         html.ios-compact th {
-            padding: 5px 3px;
+            padding: 6px 3px;
             white-space: normal;
             overflow-wrap: anywhere;
             line-height: 1.1;
         }
         html.ios-compact td {
-            padding: 4px 3px;
+            padding: 5px 3px;
             min-width: 0;
             overflow: hidden;
             overflow-wrap: anywhere;
@@ -381,21 +381,21 @@
             width: 100%;
             min-width: 0;
             max-width: 100%;
-            min-height: 25px;
-            padding: 3px 4px;
-            font-size: 0.64rem;
+            min-height: 28px;
+            padding: 4px 4px;
+            font-size: 0.73rem;
         }
         html.ios-compact td .btn {
             max-width: 100%;
             padding: 4px 5px;
-            font-size: 0.62rem;
+            font-size: 0.70rem;
             white-space: normal;
             line-height: 1.05;
         }
         html.ios-compact .btn-add {
             padding: 7px;
             margin-top: 6px;
-            font-size: 0.68rem;
+            font-size: 0.76rem;
         }
         html.ios-compact .grid-dashboard {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -404,7 +404,7 @@
         html.ios-compact .grid-2 { gap: 10px; }
         html.ios-compact .stat-header { padding: 12px; }
         html.ios-compact .stat-header h2 { font-size: 1.3rem; margin-top: 6px; }
-        html.ios-compact .stat-list { padding: 9px; font-size: 0.72rem; }
+        html.ios-compact .stat-list { padding: 9px; font-size: 0.80rem; }
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
