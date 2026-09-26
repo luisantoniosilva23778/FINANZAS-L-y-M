@@ -2,7 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta id="app-viewport" name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script>
+        /* En iPhone/iPad usamos un lienzo CSS más ancho para conservar la densidad
+           de la aplicación de escritorio/Android en TODOS los módulos. */
+        (function () {
+            var ua = navigator.userAgent || '';
+            var isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (isiOS) {
+                document.getElementById('app-viewport').setAttribute(
+                    'content',
+                    'width=690, viewport-fit=cover'
+                );
+                document.documentElement.classList.add('ios-compact');
+            }
+        })();
+    </script>
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -173,90 +188,94 @@
             padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
         }
 
-        @media (max-width: 768px) {
-            .grid-2 { grid-template-columns: 1fr; }
-
+        /*
+         * RESPONSIVE COMPACTO
+         * -------------------
+         * No apilamos automáticamente tarjetas, paneles ni botones en móviles.
+         * En iOS el viewport virtual de 690px de arriba mantiene la misma densidad
+         * visual en todos los módulos, no solo en "EL TODO".
+         */
+        @media (max-width: 520px) {
             header {
-                flex-direction: column;
-                align-items: stretch;
-                padding-top: calc(12px + env(safe-area-inset-top, 0px));
-                padding-bottom: 12px;
+                gap: 6px;
+                padding: calc(8px + env(safe-area-inset-top, 0px)) 8px 8px;
             }
 
             header > h3 {
-                text-align: center;
-                font-size: 1.05rem;
+                font-size: 0.82rem;
+                white-space: nowrap;
             }
 
             header > div {
-                justify-content: center;
-                gap: 6px;
+                flex-wrap: nowrap;
+                gap: 4px;
             }
 
             header .btn-export {
-                margin: 0 !important;
-                padding: 9px 10px;
-                font-size: 0.82rem;
-                flex: 1 1 calc(50% - 6px);
+                margin: 0 0 0 4px !important;
+                padding: 6px 8px;
+                font-size: 0.68rem;
+                width: auto;
+                flex: 0 0 auto;
             }
 
             #header-mes {
-                flex: 1 0 100%;
-                margin: 4px 0 0 !important;
-                text-align: center;
-                font-size: 0.9rem;
+                margin-left: 8px !important;
+                font-size: 0.68rem;
+                white-space: nowrap;
             }
 
+            nav { overflow-x: auto; }
             .tab-btn {
-                flex: 0 0 auto;
-                min-width: 105px;
-                padding: 12px 14px;
-                font-size: 0.82rem;
+                min-width: 88px;
+                padding: 9px 6px;
+                font-size: 0.68rem;
             }
 
             main {
-                margin: 12px auto;
-                padding-left: max(10px, env(safe-area-inset-left, 0px));
-                padding-right: max(10px, env(safe-area-inset-right, 0px));
+                margin: 10px auto;
+                padding: 0 8px;
             }
 
             .card {
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 10px;
+                margin-bottom: 10px;
             }
 
+            /* Conservamos dos columnas siempre que el módulo las haya definido así. */
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+            /* El dashboard conserva varias columnas; no se fuerza una tarjeta por fila. */
             .grid-dashboard {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 8px;
             }
 
-            input, select, textarea {
-                font-size: 16px; /* evita el zoom automático de Safari al enfocar */
-            }
-
-            table { font-size: 0.85rem; }
-            th { padding: 8px; }
-            td { padding: 7px; }
-
-            .modal-content {
-                width: 100%;
-                padding: 15px;
-            }
-
-            .analisis-fila {
-                align-items: flex-start;
-            }
+            table { font-size: 0.72rem; }
+            th { padding: 6px 5px; }
+            td { padding: 5px; }
+            .btn { padding: 6px 8px; font-size: 0.72rem; }
+            input, select, textarea { padding: 6px; min-height: 30px; }
+            .stat-header { padding: 12px; }
+            .stat-header h2 { font-size: 1.35rem; margin-top: 6px; }
+            .stat-list { padding: 9px; font-size: 0.76rem; }
+            .analisis-caja { padding: 10px; }
+            .analisis-fila { font-size: 0.8rem; gap: 6px; }
+            .bold-res { font-size: 0.9rem; }
         }
 
-        @media (max-width: 430px) {
-            header .btn-export {
-                flex-basis: 100%;
-            }
-
-            .stat-header h2 {
-                font-size: 1.55rem;
-            }
+        /* Ajustes de densidad exclusivos de la PWA de iOS, aplicables a toda la app. */
+        html.ios-compact body {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
+
+        html.ios-compact input,
+        html.ios-compact select,
+        html.ios-compact textarea {
+            font-size: 14px;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
